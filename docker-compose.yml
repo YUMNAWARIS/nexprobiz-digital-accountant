@@ -9,4 +9,4 @@ services:
     ports: 
       - 5432:5432
     volumes: 
-      - /home/yumna/NexProBiz/master/.data/var/lib/postgresql/data:/var/lib/postgresql/data:delegated
+      - /home/yumna/NEXPROBIZ/data/.data/var/lib/postgresql/data:/var/lib/postgresql/data:delegated
