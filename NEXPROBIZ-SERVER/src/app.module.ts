@@ -41,7 +41,7 @@ import {  BusinessTransactions } from './transactions/models/transactions.entity
       port: 5432,
       username: 'nex-pro-biz-master',
       password: 'nex-pro-biz-password',
-      database: 'nex-pro-biz-2',
+      database: 'nex-pro-biz',
       entities: [Asset, Depreciation, Adjustments, Closings, CurrentAssets, Expense, Liability, Owners,OwnersWithdrawls, OwnersEquity, Payables, Receivables, Revenues, statements, BusinessTransactions ],
       synchronize: true,
     }),
