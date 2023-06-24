@@ -22,7 +22,6 @@ function App() {
     ...statement_routes,
     ...closing_routes
   ];
-  console.log("object");
   return (
     <>
       <Routes>
