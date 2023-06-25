@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Closings } from '../models/closings.entity';
 import { Connection, Repository } from 'typeorm';
 import { Expense } from 'src/expenses/models/expenses.entity';
-import { Revenues } from 'src/revenues/models/revenues.entity';
-import { OwnersWithdrawls } from 'src/owners_withdrawls/models/owners_withdrawls.entity';
+import { Revenue } from 'src/revenues/models/revenues.entity';
+import { OwnersWithdrawl } from 'src/owners_withdrawls/models/owners_withdrawls.entity';
 
 
 interface data {
@@ -20,8 +20,8 @@ export class ClosingsService {
   constructor(
     @InjectRepository(Closings) private closingsRepo: Repository<Closings>,
     @InjectRepository(Expense) private expensesRepo: Repository<Expense>,
-    @InjectRepository(OwnersWithdrawls) private withdrawlepo: Repository<OwnersWithdrawls>,
-    @InjectRepository(Revenues) private revenuesRepo: Repository<Revenues>,
+    @InjectRepository(OwnersWithdrawl) private withdrawlepo: Repository<OwnersWithdrawl>,
+    @InjectRepository(Revenue) private revenuesRepo: Repository<Revenue>,
     private connection: Connection
   ) { }
 
@@ -75,8 +75,8 @@ export class ClosingsService {
       closingEntry.total_withdrawls = sum_of_withdrawl_debit - sum_of_withdrawl_debit
 
       await queryRunner.manager.update(Expense, { is_closed: false }, { is_closed: true });
-      await queryRunner.manager.update(Revenues, { is_closed: false }, { is_closed: true });
-      await queryRunner.manager.update(OwnersWithdrawls, { isClosed: false }, { is_closed: true });
+      await queryRunner.manager.update(Revenue, { is_closed: false }, { is_closed: true });
+      await queryRunner.manager.update(OwnersWithdrawl, { isClosed: false }, { is_closed: true });
 
       await queryRunner.manager.save(closingEntry)
 

@@ -3,14 +3,14 @@ import { InjectConnection, InjectRepository } from '@nestjs/typeorm';
 import { Connection, EntitySchema, ObjectType, Repository } from 'typeorm';
 import { AccountBookTypes } from '../models/AccountBookTypes';
 import { Asset } from 'src/assets/models/assets.entity';
-import { CurrentAssets } from 'src/current_assets/models/current_assets.entity';
+import { CurrentAsset } from 'src/current_assets/models/current_assets.entity';
 import { Liability } from 'src/liabilities/models/liabilties.entity';
-import { Payables } from 'src/payables/models/payables.entity';
-import { Receivables } from 'src/receivables/models/receivables.entity';
+import { Payable } from 'src/payables/models/payables.entity';
+import { Receivable } from 'src/receivables/models/receivables.entity';
 import { Expense } from 'src/expenses/models/expenses.entity';
-import { Revenues } from 'src/revenues/models/revenues.entity';
+import { Revenue } from 'src/revenues/models/revenues.entity';
 import { OwnersEquity } from 'src/owners_equity/models/owners_equity.entity';
-import { OwnersWithdrawls } from 'src/owners_withdrawls/models/owners_withdrawls.entity';
+import { OwnersWithdrawl } from 'src/owners_withdrawls/models/owners_withdrawls.entity';
 
 export interface AccountEntity {
   id: string
@@ -25,21 +25,21 @@ export class AccountService {
       case AccountBookTypes.asset:
         return Asset;
       case AccountBookTypes.current_assets:
-        return CurrentAssets;
+        return CurrentAsset;
       case AccountBookTypes.liability:
         return Liability;
       case AccountBookTypes.payables:
-        return Payables;
+        return Payable;
       case AccountBookTypes.receivables:
-        return Receivables;
+        return Receivable;
       case AccountBookTypes.expense:
         return Expense;
       case AccountBookTypes.revenues:
-        return Revenues;
+        return Revenue;
       case AccountBookTypes.owners_equity:
         return OwnersEquity;
       case AccountBookTypes.owners_withdrawl:
-        return OwnersWithdrawls;
+        return OwnersWithdrawl;
       default:
         throw new Error(`Invalid account type: ${account_type}`);
     }

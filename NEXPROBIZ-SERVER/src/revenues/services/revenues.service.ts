@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Revenues } from '../models/revenues.entity';
+import { Revenue } from '../models/revenues.entity';
 import { CreateRevenueDto } from '../dtos/createRevenue.dto';
 import { RevenueFilter } from '../dtos/revenueFilter.dto';
 import { plainToClass } from 'class-transformer';
@@ -9,10 +9,10 @@ import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class RevenuesService {
-  constructor(@InjectRepository(Revenues) private revenueRepo: Repository<Revenues>){}
+  constructor(@InjectRepository(Revenue) private revenueRepo: Repository<Revenue>){}
 
   async createNewExpense (payload: CreateRevenueDto){
-    const transformer =  plainToClass( Revenues, payload)
+    const transformer =  plainToClass( Revenue, payload)
     console.log(transformer);
     const revenues = this.revenueRepo.create(transformer);
     if(payload.is_received) {

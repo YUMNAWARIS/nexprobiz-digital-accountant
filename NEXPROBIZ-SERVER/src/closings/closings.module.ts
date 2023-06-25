@@ -4,8 +4,8 @@ import { ClosingsService } from './services/closings.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Closings } from './models/closings.entity';
 import { Expense } from 'src/expenses/models/expenses.entity';
-import { Revenues } from 'src/revenues/models/revenues.entity';
-import { OwnersWithdrawls } from 'src/owners_withdrawls/models/owners_withdrawls.entity';
+import { Revenue } from 'src/revenues/models/revenues.entity';
+import { OwnersWithdrawl } from 'src/owners_withdrawls/models/owners_withdrawls.entity';
 
 @Module({
   controllers: [ClosingsController],
@@ -14,8 +14,8 @@ import { OwnersWithdrawls } from 'src/owners_withdrawls/models/owners_withdrawls
     TypeOrmModule.forFeature([
       Closings,
       Expense,
-      Revenues,
-      OwnersWithdrawls
+      Revenue,
+      OwnersWithdrawl
     ])
   ]
 })

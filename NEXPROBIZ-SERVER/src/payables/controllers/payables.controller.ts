@@ -3,7 +3,7 @@ import { CreatePayableDto } from '../dtos/createPayables.dto';
 import { PayableFilter } from '../dtos/payablesFilters.dto';
 import { PayablesService } from '../services/payables.service';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { Payables } from '../models/payables.entity';
+import { Payable } from '../models/payables.entity';
 
 @Controller('account-books/payables')
 export class PayablesController {
@@ -11,7 +11,7 @@ export class PayablesController {
 
   @Post()
   async createNewPayable(@Body() data: CreatePayableDto){
-    const payload = plainToClass(Payables, data)
+    const payload = plainToClass(Payable, data)
     const result = await this.payableService.createNewPayable(payload)
     return result
   }

@@ -2,7 +2,7 @@ import { Owners } from "src/owners/models/owners.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class OwnersWithdrawls {
+export class OwnersWithdrawl {
 
   @PrimaryGeneratedColumn('uuid')
   id: string
