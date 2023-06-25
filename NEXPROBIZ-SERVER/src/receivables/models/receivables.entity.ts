@@ -7,7 +7,7 @@ export enum receivable_type {
 }
 
 @Entity()
-export class Receivables {
+export class Receivable {
 
   @PrimaryGeneratedColumn('uuid')
   id: string;

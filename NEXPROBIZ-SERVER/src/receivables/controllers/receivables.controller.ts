@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { ReceiablesService } from '../services/receiables.service';
 import { CreateReceivableDto } from '../dtos/createReceivables.dto';
-import { Receivables } from '../models/receivables.entity';
+import { Receivable } from '../models/receivables.entity';
 import { ReceivableFilter } from '../dtos/receivablesFilters.dto';
 
 @Controller('/account-books/receivables')
@@ -11,7 +11,7 @@ export class ReceivablesController {
 
   @Post()
   async createNewReceivable(@Body() data: CreateReceivableDto){
-    const payload = plainToClass(Receivables, data)
+    const payload = plainToClass(Receivable, data)
     const result = await this.receivableService.createNewReceivable(payload)
     return result
   }

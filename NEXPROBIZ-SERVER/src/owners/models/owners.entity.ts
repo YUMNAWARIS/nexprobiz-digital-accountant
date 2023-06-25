@@ -1,5 +1,5 @@
 import { OwnersEquity } from "src/owners_equity/models/owners_equity.entity";
-import { OwnersWithdrawls } from "src/owners_withdrawls/models/owners_withdrawls.entity";
+import { OwnersWithdrawl } from "src/owners_withdrawls/models/owners_withdrawls.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -44,6 +44,6 @@ export class Owners{
   @OneToMany(()=> OwnersEquity, (owner_equity) => owner_equity.owner)
   owner_equity: OwnersEquity
 
-  @OneToMany(()=> OwnersWithdrawls, (owner_withdrawl) => owner_withdrawl.owner)
-  owner_withdrawl: OwnersWithdrawls
+  @OneToMany(()=> OwnersWithdrawl, (owner_withdrawl) => owner_withdrawl.owner)
+  owner_withdrawl: OwnersWithdrawl
 }

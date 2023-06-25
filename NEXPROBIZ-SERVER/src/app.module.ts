@@ -21,17 +21,19 @@ import { Asset } from './assets/models/assets.entity';
 import { Depreciation } from './assets/models/depreciation.entity';
 import { Adjustments } from './adjustments/models/adjustments.entity';
 import { Closings } from './closings/models/closings.entity';
-import { CurrentAssets } from './current_assets/models/current_assets.entity';
+import { CurrentAsset } from './current_assets/models/current_assets.entity';
 import { Expense } from './expenses/models/expenses.entity';
 import { Liability } from './liabilities/models/liabilties.entity';
 import { Owners } from './owners/models/owners.entity';
-import { OwnersWithdrawls } from './owners_withdrawls/models/owners_withdrawls.entity';
+import { OwnersWithdrawl } from './owners_withdrawls/models/owners_withdrawls.entity';
 import { OwnersEquity } from './owners_equity/models/owners_equity.entity';
-import { Payables } from './payables/models/payables.entity';
-import { Receivables } from './receivables/models/receivables.entity';
-import { Revenues } from './revenues/models/revenues.entity';
+import { Payable } from './payables/models/payables.entity';
+import { Receivable } from './receivables/models/receivables.entity';
+import { Revenue } from './revenues/models/revenues.entity';
 import { statements } from './statements/models/statements';
 import {  BusinessTransactions } from './transactions/models/transactions.entity';
+import { AccountTypesModule } from './account_types/account_types.module';
+import { AccountTypes } from './account_types/models/account_types.entity';
 
 @Module({
   imports: [
@@ -42,7 +44,7 @@ import {  BusinessTransactions } from './transactions/models/transactions.entity
       username: 'nex-pro-biz-master',
       password: 'nex-pro-biz-password',
       database: 'nex-pro-biz',
-      entities: [Asset, Depreciation, Adjustments, Closings, CurrentAssets, Expense, Liability, Owners,OwnersWithdrawls, OwnersEquity, Payables, Receivables, Revenues, statements, BusinessTransactions ],
+      entities: [Asset, Depreciation, Adjustments, Closings, CurrentAsset, Expense, Liability, Owners,OwnersWithdrawl, OwnersEquity, Payable, Receivable, Revenue, statements, BusinessTransactions, AccountTypes ],
       synchronize: true,
     }),
     AssetsModule,
@@ -59,6 +61,7 @@ import {  BusinessTransactions } from './transactions/models/transactions.entity
     AdjustmentsModule,
     ClosingsModule,
     TransactionsModule,
+    AccountTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

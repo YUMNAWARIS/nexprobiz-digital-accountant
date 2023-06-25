@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CurrentAssets } from '../models/current_assets.entity';
+import { CurrentAsset } from '../models/current_assets.entity';
 import { Repository } from 'typeorm';
 import { CreateCurrentAssetDto } from '../dtos/createCurrentAsset.dto';
 import { CurrentAssetsFilters } from '../dtos/currentAssetsFilters';
 
 @Injectable()
 export class CurrentAssetsService {
-  constructor(@InjectRepository(CurrentAssets) private assetRepo: Repository<CurrentAssets>){}
+  constructor(@InjectRepository(CurrentAsset) private assetRepo: Repository<CurrentAsset>){}
 
   async createNewCurrentAsset(payloadData: CreateCurrentAssetDto){
 

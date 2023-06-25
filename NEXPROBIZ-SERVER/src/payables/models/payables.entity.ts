@@ -7,7 +7,7 @@ export enum payable_type {
 }
 
 @Entity()
-export class Payables {
+export class Payable {
 
   @PrimaryGeneratedColumn('uuid')
   id: string;
