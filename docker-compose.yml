@@ -1,12 +1,29 @@
-version: "3.4"
+version: "3.8"
 services:
-  pf-v2-db:
-    image: postgres:latest
+  db:
+    image: postgres
+    container_name: nex-pro-biz-db
+    restart: always
+    ports:
+      - "5432:5432"
     environment:
-      - POSTGRES_DB=nex-pro-biz
-      - POSTGRES_USER=nex-pro-biz-master
-      - POSTGRES_PASSWORD=nex-pro-biz-password
-    ports: 
-      - 5432:5432
-    volumes: 
-      - /home/yumna/NEXPROBIZ/data/.data/var/lib/postgresql/data:/var/lib/postgresql/data:delegated
+      POSTGRES_USER: nex-pro-biz-db
+      POSTGRES_PASSWORD: nex-pro-biz-password
+      POSTGRES_DB: nex-pro-biz
+    volumes:
+      - nex-pro-biz-db-data:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: nex-pro-biz-pgadmin
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: nex-pro-biz-db
+      PGADMIN_DEFAULT_PASSWORD: nex-pro-biz-password
+    volumes:
+      - nex-pro-biz-pgadmin-data:/var/lib/pgadmin
+
+volumes:
+  nex-pro-biz-db-data:
+  nex-pro-biz-pgadmin-data:

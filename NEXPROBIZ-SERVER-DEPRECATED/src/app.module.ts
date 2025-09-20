@@ -41,7 +41,7 @@ import { AccountTypes } from './account_types/models/account_types.entity';
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      username: 'nex-pro-biz-master',
+      username: 'nex-pro-biz-db',
       password: 'nex-pro-biz-password',
       database: 'nex-pro-biz',
       entities: [Asset, Depreciation, Adjustments, Closings, CurrentAsset, Expense, Liability, Owners,OwnersWithdrawl, OwnersEquity, Payable, Receivable, Revenue, statements, BusinessTransactions, AccountTypes ],
