@@ -59,7 +59,7 @@ export default function MasterNavbar() {
       <Divider />
       <List>
         {navItems.map((item) => {
-          const selected = pathname === item.href || pathname?.startsWith(item.href + "/");
+          const selected = pathname === item.href
           return (
             <ListItemButton
               key={item.href}
