@@ -19,7 +19,7 @@ services:
     ports:
       - "8888:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: nex-pro-biz-db
+      PGADMIN_DEFAULT_EMAIL: yumnaahware@gmail.com
       PGADMIN_DEFAULT_PASSWORD: nex-pro-biz-password
     volumes:
       - nex-pro-biz-pgadmin-data:/var/lib/pgadmin
