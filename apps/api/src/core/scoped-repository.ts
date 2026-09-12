@@ -4,9 +4,9 @@
  * unscoped query. requireById() throws NotFoundError → 404 by construction (Story 2.4):
  * cross-tenant rows simply are not returned, so there is no existence oracle.
  */
-import type { Knex } from "knex";
-import type { AnyCtx, TxCtx } from "./context";
-import { NotFoundError } from "./errors";
+import type { Knex } from 'knex';
+import type { AnyCtx, TxCtx } from './context';
+import { NotFoundError } from './errors';
 
 export interface TenantRow {
   id: string;
@@ -25,7 +25,7 @@ export abstract class TenantScopedRepository<TRow extends TenantRow> {
 
   /** Tenant-scoped query builder. Uses the transaction when one is present. */
   protected q(ctx: AnyCtx): Knex.QueryBuilder<TRow, TRow[]> {
-    const conn = "trx" in ctx ? ctx.trx : this.#db;
+    const conn = 'trx' in ctx ? ctx.trx : this.#db;
     return conn<TRow>(this.table).where(
       `${this.table}.tenant_id`,
       ctx.tenantId,
@@ -37,20 +37,20 @@ export abstract class TenantScopedRepository<TRow extends TenantRow> {
   /** Raw insert with tenant_id forced from ctx — never from the payload. */
   protected async insertOne(
     ctx: AnyCtx,
-    row: Omit<TRow, "tenant_id" | "id"> & Partial<Pick<TRow, "id">>,
+    row: Omit<TRow, 'tenant_id' | 'id'> & Partial<Pick<TRow, 'id'>>,
   ): Promise<TRow> {
-    const conn = "trx" in ctx ? ctx.trx : this.#db;
+    const conn = 'trx' in ctx ? ctx.trx : this.#db;
     const [created] = await conn<TRow>(this.table)
       .insert({ ...(row as object), tenant_id: ctx.tenantId } as never)
-      .returning("*");
+      .returning('*');
     return created as TRow;
   }
   protected async insertMany(
     ctx: AnyCtx,
-    rows: Array<Omit<TRow, "tenant_id" | "id">>,
+    rows: Array<Omit<TRow, 'tenant_id' | 'id'>>,
   ): Promise<TRow[]> {
     if (rows.length === 0) return [];
-    const conn = "trx" in ctx ? ctx.trx : this.#db;
+    const conn = 'trx' in ctx ? ctx.trx : this.#db;
     return (await conn<TRow>(this.table)
       .insert(
         rows.map((r) => ({
@@ -58,7 +58,7 @@ export abstract class TenantScopedRepository<TRow extends TenantRow> {
           tenant_id: ctx.tenantId,
         })) as never,
       )
-      .returning("*")) as TRow[];
+      .returning('*')) as TRow[];
   }
 
   async findById(ctx: AnyCtx, id: string): Promise<TRow | null> {
@@ -71,9 +71,7 @@ export abstract class TenantScopedRepository<TRow extends TenantRow> {
     return row;
   }
   async requireByIdForUpdate(tx: TxCtx, id: string): Promise<TRow> {
-    const row = (await this.qLocked(tx)
-      .where(`${this.table}.id`, id)
-      .first()) as TRow | undefined;
+    const row = (await this.qLocked(tx).where(`${this.table}.id`, id).first()) as TRow | undefined;
     if (!row) throw new NotFoundError(this.entity, id);
     return row;
   }
@@ -81,5 +79,5 @@ export abstract class TenantScopedRepository<TRow extends TenantRow> {
 
 /** For global (non-tenant) reference tables: users, sessions, tenants, categories, tax rules. */
 export function conn(db: Knex, ctx?: AnyCtx): Knex | Knex.Transaction {
-  return ctx && "trx" in ctx ? ctx.trx : db;
+  return ctx && 'trx' in ctx ? ctx.trx : db;
 }

@@ -1,6 +1,6 @@
 /** §19 Authentication REST Contracts */
-import { z } from "zod";
-import { body, Email, Uuid } from "./common";
+import { z } from 'zod';
+import { body, Email, Uuid } from './common';
 
 // Password policy: sandbox minimum; spec gives "StrongPassword123!" as the example.
 export const Password = z.string().min(8).max(128);

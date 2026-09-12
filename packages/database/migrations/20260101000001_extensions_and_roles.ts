@@ -1,4 +1,4 @@
-import type { Knex } from "knex";
+import type { Knex } from 'knex';
 
 /**
  * Extensions + the runtime role.
@@ -13,7 +13,7 @@ export async function up(knex: Knex): Promise<void> {
   await knex.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
   await knex.raw('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
 
-  const password = process.env.DB_RUNTIME_PASSWORD ?? "fa_runtime";
+  const password = process.env.DB_RUNTIME_PASSWORD ?? 'fa_runtime';
   await knex.raw(
     `
     DO $$
@@ -26,19 +26,17 @@ export async function up(knex: Knex): Promise<void> {
   `,
   );
 
-  await knex.raw("GRANT USAGE ON SCHEMA public TO fa_runtime");
+  await knex.raw('GRANT USAGE ON SCHEMA public TO fa_runtime');
   await knex.raw(
-    "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO fa_runtime",
+    'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO fa_runtime',
   );
-  await knex.raw(
-    "GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO fa_runtime",
-  );
+  await knex.raw('GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO fa_runtime');
   // Tables created by later migrations inherit these grants.
   await knex.raw(
-    "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO fa_runtime",
+    'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO fa_runtime',
   );
   await knex.raw(
-    "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO fa_runtime",
+    'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO fa_runtime',
   );
 
   // updated_at maintenance for tables that have it.
@@ -53,17 +51,14 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  await knex.raw("DROP FUNCTION IF EXISTS set_updated_at()");
+  await knex.raw('DROP FUNCTION IF EXISTS set_updated_at()');
+  await knex.raw('ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM fa_runtime');
   await knex.raw(
-    "ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM fa_runtime",
+    'ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM fa_runtime',
   );
-  await knex.raw(
-    "ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM fa_runtime",
-  );
-  await knex.raw("REVOKE ALL ON ALL TABLES IN SCHEMA public FROM fa_runtime");
-  await knex.raw(
-    "REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM fa_runtime",
-  );
-  await knex.raw("REVOKE USAGE ON SCHEMA public FROM fa_runtime");
-  await knex.raw("DROP ROLE IF EXISTS fa_runtime");
+  await knex.raw('REVOKE ALL ON ALL TABLES IN SCHEMA public FROM fa_runtime');
+  await knex.raw('REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM fa_runtime');
+  await knex.raw('REVOKE USAGE ON SCHEMA public FROM fa_runtime');
+  // The role is cluster-wide and may still hold grants in OTHER databases (e.g. fa_test);
+  // dropping it there would fail and leave this migration half-rolled-back. Keep the role.
 }

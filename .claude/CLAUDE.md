@@ -2,6 +2,7 @@
 
 Source of truth: the spec PDF ("Freelancer Accounting SaaS Sandbox MVP") + `docs/DEVIATIONS.md`.
 Implementation plan: `~/.claude/plans/attached-document-is-the-toasty-pony.md`.
+Codebase map (read first): `docs/architecture/knowledge-graph.md`.
 
 ## Stack (approved deviations from the spec in docs/DEVIATIONS.md)
 

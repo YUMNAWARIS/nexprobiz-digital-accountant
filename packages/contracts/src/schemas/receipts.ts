@@ -1,15 +1,8 @@
 /** §24 Receipt REST Contracts · §11.12 receipts · §11.13 ocr_runs · §16 state machine */
-import { z } from "zod";
-import { ReceiptStatus } from "../enums";
-import { MoneySchema } from "../money";
-import {
-  body,
-  IsoDate,
-  IsoDateTime,
-  PageQuery,
-  Uuid,
-  paginated,
-} from "./common";
+import { z } from 'zod';
+import { ReceiptStatus } from '../enums';
+import { MoneySchema } from '../money';
+import { body, IsoDate, IsoDateTime, PageQuery, Uuid, paginated } from './common';
 
 /** 202 response on upload */
 export const ReceiptUploadResponse = z.object({

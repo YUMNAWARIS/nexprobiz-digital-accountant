@@ -1,13 +1,13 @@
-import { createApp } from "./app";
-import { loadEnv } from "./config/env";
-import { createContainer, createInfra } from "./composition-root";
-import { createLogger } from "./infra/logger";
+import { createApp } from './app';
+import { loadEnv } from './config/env';
+import { createContainer, createInfra } from './composition-root';
+import { createLogger } from './infra/logger';
 
-async function main() {
+function main() {
   const env = loadEnv();
   const logger = createLogger({
     level: env.LOG_LEVEL,
-    pretty: env.NODE_ENV === "development",
+    pretty: env.NODE_ENV === 'development',
   });
   const container = createContainer(createInfra(env, logger));
   const app = createApp({
@@ -18,11 +18,11 @@ async function main() {
   });
 
   const server = app.listen(env.PORT, () =>
-    logger.info({ port: env.PORT, env: env.NODE_ENV }, "api listening"),
+    logger.info({ port: env.PORT, env: env.NODE_ENV }, 'api listening'),
   );
 
   const shutdown = (signal: string) => {
-    logger.info({ signal }, "shutting down");
+    logger.info({ signal }, 'shutting down');
     server.close(() => {
       container
         .shutdown()
@@ -31,15 +31,17 @@ async function main() {
     });
     setTimeout(() => process.exit(1), 30_000).unref();
   };
-  process.on("SIGTERM", () => shutdown("SIGTERM"));
-  process.on("SIGINT", () => shutdown("SIGINT"));
-  process.on("unhandledRejection", (err) => {
-    logger.fatal({ err }, "unhandledRejection");
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('unhandledRejection', (err) => {
+    logger.fatal({ err }, 'unhandledRejection');
     process.exit(1);
   });
 }
 
-main().catch((err: unknown) => {
+try {
+  main();
+} catch (err: unknown) {
   console.error(err);
   process.exit(1);
-});
+}

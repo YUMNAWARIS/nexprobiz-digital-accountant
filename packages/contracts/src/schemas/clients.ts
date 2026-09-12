@@ -1,15 +1,7 @@
 /** §21 Client REST Contracts · §11.6 clients */
-import { z } from "zod";
-import { ClientStatus } from "../enums";
-import {
-  body,
-  CountryCode,
-  Email,
-  IsoDateTime,
-  PageQuery,
-  Uuid,
-  paginated,
-} from "./common";
+import { z } from 'zod';
+import { ClientStatus } from '../enums';
+import { body, CountryCode, Email, IsoDateTime, PageQuery, Uuid, paginated } from './common';
 
 export const CreateClientRequest = body({
   name: z.string().trim().min(1).max(200),
@@ -18,7 +10,7 @@ export const CreateClientRequest = body({
   street: z.string().trim().max(200).optional().nullable(),
   postalCode: z.string().trim().max(20).optional().nullable(),
   city: z.string().trim().max(100).optional().nullable(),
-  country: CountryCode.default("DE"),
+  country: CountryCode.default('DE'),
   vatId: z.string().trim().toUpperCase().max(30).optional().nullable(),
   paymentTermDays: z.number().int().min(0).max(365).optional().nullable(),
 });

@@ -4,11 +4,11 @@
  * TxCtx is nominally branded: only createUnitOfWork() can produce one, so a method whose
  * signature takes TxCtx PROVABLY runs inside a Postgres transaction with app.tenant_id set.
  */
-import type { Knex } from "knex";
-import type { Logger } from "pino";
+import type { Knex } from 'knex';
+import type { Logger } from 'pino';
 
 export interface Actor {
-  readonly kind: "USER" | "SYSTEM";
+  readonly kind: 'USER' | 'SYSTEM';
   readonly userId: string | null; // null for SYSTEM (worker, outbox dispatcher)
   readonly tenantId: string;
   readonly sessionId: string | null;
@@ -36,17 +36,13 @@ export interface TxCtx extends RequestCtx {
 export type AnyCtx = RequestCtx | TxCtx;
 
 export function isTxCtx(c: AnyCtx): c is TxCtx {
-  return "trx" in c;
+  return 'trx' in c;
 }
 
-export function systemCtx(
-  tenantId: string,
-  logger: Logger,
-  requestId = "system",
-): RequestCtx {
+export function systemCtx(tenantId: string, logger: Logger, requestId = 'system'): RequestCtx {
   return {
     tenantId,
-    actor: { kind: "SYSTEM", userId: null, tenantId, sessionId: null },
+    actor: { kind: 'SYSTEM', userId: null, tenantId, sessionId: null },
     requestId,
     now: new Date(),
     logger,

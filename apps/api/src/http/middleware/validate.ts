@@ -1,6 +1,6 @@
-import type { RequestHandler } from "express";
-import type { ZodTypeAny, z } from "zod";
-import { ValidationError } from "@/core/errors";
+import type { RequestHandler } from 'express';
+import type { ZodTypeAny, z } from 'zod';
+import { ValidationError } from '@/core/errors';
 
 export interface Schemas {
   body?: ZodTypeAny;
@@ -8,7 +8,7 @@ export interface Schemas {
   params?: ZodTypeAny;
 }
 
-declare module "express-serve-static-core" {
+declare module 'express-serve-static-core' {
   interface Request {
     validated: { body: unknown; query: unknown; params: unknown };
   }
@@ -16,7 +16,7 @@ declare module "express-serve-static-core" {
 
 function toDetails(err: z.ZodError, where: string) {
   return err.issues.map((i) => ({
-    field: i.path.length ? i.path.join(".") : where,
+    field: i.path.length ? i.path.join('.') : where,
     message: i.message,
   }));
 }
@@ -29,9 +29,7 @@ export function validate(schemas: Schemas): RequestHandler {
       query: undefined,
       params: undefined,
     };
-    for (const [key, schema] of Object.entries(schemas) as Array<
-      [keyof Schemas, ZodTypeAny]
-    >) {
+    for (const [key, schema] of Object.entries(schemas) as Array<[keyof Schemas, ZodTypeAny]>) {
       const r = schema.safeParse(req[key]);
       if (!r.success) return next(new ValidationError(toDetails(r.error, key)));
       out[key] = r.data;
@@ -45,17 +43,17 @@ export function validatedBody<T extends ZodTypeAny>(
   req: { validated: { body: unknown } },
   _s: T,
 ): z.output<T> {
-  return req.validated.body as z.output<T>;
+  return req.validated.body;
 }
 export function validatedQuery<T extends ZodTypeAny>(
   req: { validated: { query: unknown } },
   _s: T,
 ): z.output<T> {
-  return req.validated.query as z.output<T>;
+  return req.validated.query;
 }
 export function validatedParams<T extends ZodTypeAny>(
   req: { validated: { params: unknown } },
   _s: T,
 ): z.output<T> {
-  return req.validated.params as z.output<T>;
+  return req.validated.params;
 }

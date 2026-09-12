@@ -4,8 +4,8 @@
  * RLS (migration 017). Reads also go through a (read-only) transaction for the same reason.
  * onCommit hooks fire strictly after db.transaction() resolves, i.e. after COMMIT (§36).
  */
-import type { Knex } from "knex";
-import type { RequestCtx, TxCtx } from "./context";
+import type { Knex } from 'knex';
+import type { RequestCtx, TxCtx } from './context';
 
 export interface UnitOfWork {
   write<T>(ctx: RequestCtx, fn: (tx: TxCtx) => Promise<T>): Promise<T>;
@@ -20,10 +20,8 @@ export function createUnitOfWork(db: Knex): UnitOfWork {
   ): Promise<T> {
     const hooks: Array<() => void | Promise<void>> = [];
     const result = await db.transaction(async (trx) => {
-      if (readOnly) await trx.raw("SET TRANSACTION READ ONLY");
-      await trx.raw("SELECT set_config('app.tenant_id', ?, true)", [
-        ctx.tenantId,
-      ]);
+      if (readOnly) await trx.raw('SET TRANSACTION READ ONLY');
+      await trx.raw("SELECT set_config('app.tenant_id', ?, true)", [ctx.tenantId]);
       const tx = Object.assign(Object.create(null) as object, ctx, {
         trx,
         onCommit: (f: () => void | Promise<void>) => {
@@ -36,10 +34,7 @@ export function createUnitOfWork(db: Knex): UnitOfWork {
       try {
         await h();
       } catch (e) {
-        ctx.logger.error(
-          { err: e, requestId: ctx.requestId },
-          "onCommit hook failed",
-        );
+        ctx.logger.error({ err: e, requestId: ctx.requestId }, 'onCommit hook failed');
       }
     }
     return result;
@@ -56,5 +51,5 @@ export function inTx<T>(
   ctx: RequestCtx | TxCtx,
   fn: (tx: TxCtx) => Promise<T>,
 ): Promise<T> {
-  return "trx" in ctx ? fn(ctx as TxCtx) : uow.write(ctx, fn);
+  return 'trx' in ctx ? fn(ctx) : uow.write(ctx, fn);
 }

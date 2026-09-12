@@ -1,9 +1,8 @@
-import type { QueuePort } from "@/core/ports";
+import type { QueuePort } from '@/core/ports';
 
 /** Test/dev adapter: records messages; optional handler runs them inline. */
 export class InMemoryQueue implements QueuePort {
-  readonly messages: Array<{ queue: string; message: object; jobId?: string }> =
-    [];
+  readonly messages: Array<{ queue: string; message: object; jobId?: string }> = [];
   handler: ((queue: string, message: object) => Promise<void>) | null = null;
   async enqueue<T extends object>(
     queue: string,

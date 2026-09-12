@@ -3,11 +3,11 @@
  * (a) every non-public route carries requireAuth and (b) every route with a body validates it.
  * This replaces NestJS's global ValidationPipe + guards.
  */
-import type { RequestHandler, Router } from "express";
-import type { ZodTypeAny } from "zod";
-import { validate, type Schemas } from "./middleware/validate";
+import type { RequestHandler, Router } from 'express';
+import type { ZodTypeAny } from 'zod';
+import { validate, type Schemas } from './middleware/validate';
 
-export type Method = "get" | "post" | "put" | "patch" | "delete";
+export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
 export interface RouteDef {
   method: Method;
@@ -33,16 +33,8 @@ export interface RouteDeps {
 }
 
 /** Composes the middleware chain in the one correct order: auth → upload → validate → handler. */
-export function defineRoutes(
-  router: Router,
-  basePath: string,
-  deps: RouteDeps,
-) {
-  return (
-    def: RouteDef,
-    handler: RequestHandler,
-    extra: RequestHandler[] = [],
-  ) => {
+export function defineRoutes(router: Router, basePath: string, deps: RouteDeps) {
+  return (def: RouteDef, handler: RequestHandler, extra: RequestHandler[] = []) => {
     const chain: RequestHandler[] = [];
     if (!def.public) chain.push(deps.requireAuth);
     chain.push(...extra);
@@ -51,7 +43,7 @@ export function defineRoutes(
     router[def.method](def.path, ...chain);
     ROUTE_REGISTRY.push({
       ...def,
-      fullPath: `${basePath}${def.path}`.replace(/\/{2,}/g, "/"),
+      fullPath: `${basePath}${def.path}`.replace(/\/{2,}/g, '/'),
     });
   };
 }

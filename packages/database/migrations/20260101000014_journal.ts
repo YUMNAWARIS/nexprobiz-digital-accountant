@@ -1,4 +1,4 @@
-import type { Knex } from "knex";
+import type { Knex } from 'knex';
 
 /**
  * §11.20 journal_entries · §11.21 journal_lines
@@ -7,33 +7,24 @@ import type { Knex } from "knex";
  * at COMMIT after all lines of an entry are inserted.
  */
 export async function up(knex: Knex): Promise<void> {
-  await knex.schema.createTable("journal_entries", (t) => {
-    t.uuid("id").primary().defaultTo(knex.raw("uuid_generate_v4()"));
-    t.uuid("tenant_id")
-      .notNullable()
-      .references("id")
-      .inTable("tenants")
-      .onDelete("CASCADE");
+  await knex.schema.createTable('journal_entries', (t) => {
+    t.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('tenant_id').notNullable().references('id').inTable('tenants').onDelete('CASCADE');
 
-    t.string("source_type", 30).notNullable();
-    t.uuid("source_id").notNullable();
+    t.string('source_type', 30).notNullable();
+    t.uuid('source_id').notNullable();
 
-    t.date("posting_date").notNullable();
-    t.text("description").notNullable();
+    t.date('posting_date').notNullable();
+    t.text('description').notNullable();
 
-    t.string("status", 20).notNullable();
-    t.uuid("reversal_of")
-      .nullable()
-      .references("id")
-      .inTable("journal_entries");
+    t.string('status', 20).notNullable();
+    t.uuid('reversal_of').nullable().references('id').inTable('journal_entries');
 
-    t.timestamp("created_at", { useTz: true })
-      .notNullable()
-      .defaultTo(knex.fn.now());
+    t.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
-    t.index(["tenant_id", "posting_date"]);
-    t.index(["tenant_id", "source_type", "source_id"]);
-    t.index(["tenant_id", "status"]);
+    t.index(['tenant_id', 'posting_date']);
+    t.index(['tenant_id', 'source_type', 'source_id']);
+    t.index(['tenant_id', 'status']);
   });
   await knex.raw(`
     ALTER TABLE journal_entries
@@ -42,33 +33,31 @@ export async function up(knex: Knex): Promise<void> {
   `);
   // At most one reversal per entry — race-proof, unlike a SELECT-then-check.
   await knex.raw(
-    "CREATE UNIQUE INDEX journal_entries_reversal_once ON journal_entries (reversal_of) WHERE reversal_of IS NOT NULL",
+    'CREATE UNIQUE INDEX journal_entries_reversal_once ON journal_entries (reversal_of) WHERE reversal_of IS NOT NULL',
   );
 
-  await knex.schema.createTable("journal_lines", (t) => {
-    t.uuid("id").primary().defaultTo(knex.raw("uuid_generate_v4()"));
-    t.uuid("journal_entry_id")
+  await knex.schema.createTable('journal_lines', (t) => {
+    t.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
+    t.uuid('journal_entry_id')
       .notNullable()
-      .references("id")
-      .inTable("journal_entries")
-      .onDelete("CASCADE");
+      .references('id')
+      .inTable('journal_entries')
+      .onDelete('CASCADE');
 
-    t.string("account_number", 20).notNullable();
-    t.string("counter_account", 20).nullable();
-    t.string("category_code", 50).nullable();
+    t.string('account_number', 20).notNullable();
+    t.string('counter_account', 20).nullable();
+    t.string('category_code', 50).nullable();
 
-    t.string("direction", 10).notNullable();
+    t.string('direction', 10).notNullable();
 
-    t.decimal("amount", 15, 2).notNullable();
-    t.decimal("tax_amount", 15, 2).notNullable().defaultTo(0);
-    t.decimal("tax_rate", 7, 4).nullable();
+    t.decimal('amount', 15, 2).notNullable();
+    t.decimal('tax_amount', 15, 2).notNullable().defaultTo(0);
+    t.decimal('tax_rate', 7, 4).nullable();
 
-    t.timestamp("created_at", { useTz: true })
-      .notNullable()
-      .defaultTo(knex.fn.now());
+    t.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
 
-    t.index(["journal_entry_id"]);
-    t.index(["account_number"]);
+    t.index(['journal_entry_id']);
+    t.index(['account_number']);
   });
   await knex.raw(`
     ALTER TABLE journal_lines
@@ -150,18 +139,12 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  await knex.raw(
-    "DROP TRIGGER IF EXISTS journal_entries_restrict ON journal_entries",
-  );
-  await knex.raw("DROP FUNCTION IF EXISTS restrict_journal_entry_update()");
-  await knex.raw(
-    "DROP TRIGGER IF EXISTS journal_lines_immutable ON journal_lines",
-  );
-  await knex.raw("DROP FUNCTION IF EXISTS reject_journal_line_mutation()");
-  await knex.raw(
-    "DROP TRIGGER IF EXISTS journal_lines_balanced ON journal_lines",
-  );
-  await knex.raw("DROP FUNCTION IF EXISTS assert_journal_entry_balanced()");
-  await knex.schema.dropTableIfExists("journal_lines");
-  await knex.schema.dropTableIfExists("journal_entries");
+  await knex.raw('DROP TRIGGER IF EXISTS journal_entries_restrict ON journal_entries');
+  await knex.raw('DROP FUNCTION IF EXISTS restrict_journal_entry_update()');
+  await knex.raw('DROP TRIGGER IF EXISTS journal_lines_immutable ON journal_lines');
+  await knex.raw('DROP FUNCTION IF EXISTS reject_journal_line_mutation()');
+  await knex.raw('DROP TRIGGER IF EXISTS journal_lines_balanced ON journal_lines');
+  await knex.raw('DROP FUNCTION IF EXISTS assert_journal_entry_balanced()');
+  await knex.schema.dropTableIfExists('journal_lines');
+  await knex.schema.dropTableIfExists('journal_entries');
 }

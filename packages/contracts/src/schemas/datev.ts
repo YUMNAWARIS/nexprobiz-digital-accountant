@@ -1,7 +1,7 @@
 /** §32 DATEV API · §33 DATEV Sandbox Implementation · §11.24 exports */
-import { z } from "zod";
-import { ExportStatus, ExportType } from "../enums";
-import { body, IsoDate, IsoDateTime, Uuid } from "./common";
+import { z } from 'zod';
+import { ExportStatus, ExportType } from '../enums';
+import { body, IsoDate, IsoDateTime, Uuid } from './common';
 
 export const CreateDatevExportRequest = body({
   periodStart: IsoDate,
@@ -9,14 +9,14 @@ export const CreateDatevExportRequest = body({
   beraternummer: z
     .string()
     .trim()
-    .regex(/^\d{4,7}$/, "Beraternummer must be 4–7 digits"),
+    .regex(/^\d{4,7}$/, 'Beraternummer must be 4–7 digits'),
   mandantennummer: z
     .string()
     .trim()
-    .regex(/^\d{1,5}$/, "Mandantennummer must be 1–5 digits"),
+    .regex(/^\d{1,5}$/, 'Mandantennummer must be 1–5 digits'),
 }).refine((v) => v.periodStart <= v.periodEnd, {
-  path: ["periodEnd"],
-  message: "periodEnd must not be before periodStart",
+  path: ['periodEnd'],
+  message: 'periodEnd must not be before periodStart',
 });
 export type CreateDatevExportRequest = z.infer<typeof CreateDatevExportRequest>;
 

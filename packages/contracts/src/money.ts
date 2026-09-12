@@ -12,8 +12,8 @@
  * Rounding: ROUND_HALF_UP (kaufmännische Rundung), which is what DATEV and §14 UStG invoice
  * presentation expect.
  */
-import { Decimal } from "decimal.js";
-import { z } from "zod";
+import { Decimal } from 'decimal.js';
+import { z } from 'zod';
 
 Decimal.set({
   precision: 34,
@@ -28,22 +28,22 @@ Decimal.set({
 // money is expected.
 // ---------------------------------------------------------------------------
 /** NUMERIC(15,2) — exactly two decimal places, e.g. "119.00" */
-export type Money = string & { readonly __brand: "Money" };
+export type Money = string & { readonly __brand: 'Money' };
 /** NUMERIC(7,4) — exactly four decimal places, e.g. "0.1900" for 19% */
-export type Rate = string & { readonly __brand: "Rate" };
+export type Rate = string & { readonly __brand: 'Rate' };
 /** NUMERIC(15,4) — exactly four decimal places, e.g. "10.0000" */
-export type Qty = string & { readonly __brand: "Qty" };
+export type Qty = string & { readonly __brand: 'Qty' };
 
 export const MONEY_DP = 2;
 export const RATE_DP = 4;
 export const QTY_DP = 4;
 
 /** NUMERIC(15,2) upper bound: 13 integer digits. */
-const MONEY_MAX = new Decimal("9999999999999.99");
+const MONEY_MAX = new Decimal('9999999999999.99');
 /** NUMERIC(15,4) upper bound: 11 integer digits. */
-const QTY_MAX = new Decimal("99999999999.9999");
+const QTY_MAX = new Decimal('99999999999.9999');
 /** NUMERIC(7,4) upper bound: 3 integer digits. */
-const RATE_MAX = new Decimal("999.9999");
+const RATE_MAX = new Decimal('999.9999');
 
 const DECIMAL_STRING = /^-?\d+(\.\d+)?$/;
 
@@ -53,26 +53,23 @@ export class MoneyError extends Error {
     public readonly value?: unknown,
   ) {
     super(message);
-    this.name = "MoneyError";
+    this.name = 'MoneyError';
   }
 }
 
 function parse(v: string | number | Decimal, what: string): Decimal {
   if (v instanceof Decimal) {
-    if (!v.isFinite())
-      throw new MoneyError(`${what}: value is not finite`, v.toString());
+    if (!v.isFinite()) throw new MoneyError(`${what}: value is not finite`, v.toString());
     return v;
   }
-  if (typeof v === "number") {
+  if (typeof v === 'number') {
     // Numbers are accepted ONLY as an ergonomic entry point for literals in tests/seeds.
     // Any number with more than 15 significant digits has already lost precision.
-    if (!Number.isFinite(v))
-      throw new MoneyError(`${what}: value is not finite`, v);
+    if (!Number.isFinite(v)) throw new MoneyError(`${what}: value is not finite`, v);
     return new Decimal(v);
   }
   const s = v.trim();
-  if (!DECIMAL_STRING.test(s))
-    throw new MoneyError(`${what}: invalid decimal string`, v);
+  if (!DECIMAL_STRING.test(s)) throw new MoneyError(`${what}: invalid decimal string`, v);
   return new Decimal(s);
 }
 
@@ -86,39 +83,36 @@ function fixed(d: Decimal, dp: number): string {
 
 /** Construct Money. Rounds HALF_UP to 2dp. Throws on NaN/Infinity/overflow/garbage. */
 export function money(v: string | number | Decimal): Money {
-  const d = parse(v, "money");
-  if (d.abs().gt(MONEY_MAX))
-    throw new MoneyError("money: exceeds NUMERIC(15,2)", v);
+  const d = parse(v, 'money');
+  if (d.abs().gt(MONEY_MAX)) throw new MoneyError('money: exceeds NUMERIC(15,2)', v);
   return fixed(d, MONEY_DP) as Money;
 }
 
 /** Construct a Rate. "0.1900" for 19%. Rounds to 4dp. */
 export function rate(v: string | number | Decimal): Rate {
-  const d = parse(v, "rate");
-  if (d.abs().gt(RATE_MAX))
-    throw new MoneyError("rate: exceeds NUMERIC(7,4)", v);
+  const d = parse(v, 'rate');
+  if (d.abs().gt(RATE_MAX)) throw new MoneyError('rate: exceeds NUMERIC(7,4)', v);
   return fixed(d, RATE_DP) as Rate;
 }
 
 /** Construct a Qty. Rounds to 4dp. */
 export function qty(v: string | number | Decimal): Qty {
-  const d = parse(v, "qty");
-  if (d.abs().gt(QTY_MAX))
-    throw new MoneyError("qty: exceeds NUMERIC(15,4)", v);
+  const d = parse(v, 'qty');
+  if (d.abs().gt(QTY_MAX)) throw new MoneyError('qty: exceeds NUMERIC(15,4)', v);
   return fixed(d, QTY_DP) as Qty;
 }
 
-export const ZERO: Money = "0.00" as Money;
-export const ZERO_RATE: Rate = "0.0000" as Rate;
+export const ZERO: Money = '0.00' as Money;
+export const ZERO_RATE: Rate = '0.0000' as Rate;
 
 export function isMoney(v: unknown): v is Money {
-  return typeof v === "string" && /^-?\d{1,13}\.\d{2}$/.test(v);
+  return typeof v === 'string' && /^-?\d{1,13}\.\d{2}$/.test(v);
 }
 export function isRate(v: unknown): v is Rate {
-  return typeof v === "string" && /^-?\d{1,3}\.\d{4}$/.test(v);
+  return typeof v === 'string' && /^-?\d{1,3}\.\d{4}$/.test(v);
 }
 export function isQty(v: unknown): v is Qty {
-  return typeof v === "string" && /^-?\d{1,11}\.\d{4}$/.test(v);
+  return typeof v === 'string' && /^-?\d{1,11}\.\d{4}$/.test(v);
 }
 
 /**
@@ -126,7 +120,7 @@ export function isQty(v: unknown): v is Qty {
  * column). Asserts the shape; does not round. Use in repository mappers only.
  */
 export function moneyFromDb(v: string | null | undefined): Money {
-  if (v == null) throw new MoneyError("moneyFromDb: null");
+  if (v == null) throw new MoneyError('moneyFromDb: null');
   if (!isMoney(v)) {
     // pg may return "119" for NUMERIC(15,2) if the value was inserted without a fraction.
     // Normalize, but only if it is still a clean decimal.
@@ -135,11 +129,11 @@ export function moneyFromDb(v: string | null | undefined): Money {
   return v;
 }
 export function rateFromDb(v: string | null | undefined): Rate {
-  if (v == null) throw new MoneyError("rateFromDb: null");
+  if (v == null) throw new MoneyError('rateFromDb: null');
   return isRate(v) ? v : rate(v);
 }
 export function qtyFromDb(v: string | null | undefined): Qty {
-  if (v == null) throw new MoneyError("qtyFromDb: null");
+  if (v == null) throw new MoneyError('qtyFromDb: null');
   return isQty(v) ? v : qty(v);
 }
 
@@ -157,7 +151,7 @@ export function fromDecimal(d: Decimal): Money {
 /** Throws if d has more than 2dp. Use for invariants where rounding would hide a bug. */
 export function fromDecimalExact(d: Decimal): Money {
   if (d.decimalPlaces() > MONEY_DP)
-    throw new MoneyError("fromDecimalExact: value has > 2dp", d.toString());
+    throw new MoneyError('fromDecimalExact: value has > 2dp', d.toString());
   return money(d);
 }
 
@@ -178,9 +172,7 @@ export function abs(a: Money): Money {
   return money(toDecimal(a).abs());
 }
 export function sum(items: readonly Money[]): Money {
-  return money(
-    items.reduce((acc, m) => acc.plus(toDecimal(m)), new Decimal(0)),
-  );
+  return money(items.reduce((acc, m) => acc.plus(toDecimal(m)), new Decimal(0)));
 }
 /** unitPrice × quantity → Money, rounded HALF_UP once. This is the persisted line net. */
 export function mulQty(unitPrice: Money | Qty, quantity: Qty): Money {
@@ -247,11 +239,9 @@ export function allocate(total: Money, weights: readonly Money[]): Money[] {
     return out;
   }
   const raw = W.map((w) => T.times(w).dividedBy(wSum));
-  const floored = raw.map((r) =>
-    r.toDecimalPlaces(MONEY_DP, Decimal.ROUND_DOWN),
-  );
+  const floored = raw.map((r) => r.toDecimalPlaces(MONEY_DP, Decimal.ROUND_DOWN));
   let remainder = T.minus(floored.reduce((a, b) => a.plus(b), new Decimal(0)));
-  const cent = new Decimal("0.01");
+  const cent = new Decimal('0.01');
   // Distribute leftover cents to the largest fractional remainders first (stable by index).
   const order = raw
     .map((r, i) => ({ i, frac: r.minus(floored[i]!) }))
@@ -276,38 +266,32 @@ const decimalString = (dp: number, what: string) =>
     .trim()
     .regex(DECIMAL_STRING, `${what} must be a decimal string like "123.45"`)
     .refine(
-      (s) => new Decimal(s).decimalPlaces() <= dp,
+      (s) => !DECIMAL_STRING.test(s) || new Decimal(s).decimalPlaces() <= dp,
       `${what} may have at most ${dp} decimal places`,
     );
 
 /** Any money value, normalized to 2dp. */
-export const MoneySchema = decimalString(MONEY_DP, "Amount").transform((s) =>
-  money(s),
-);
+export const MoneySchema = decimalString(MONEY_DP, 'Amount').transform((s) => money(s));
 /** Money > 0 */
 export const PositiveMoneySchema = MoneySchema.refine(
   (m) => isPositive(m),
-  "Amount must be greater than zero",
+  'Amount must be greater than zero',
 );
 /** Money >= 0 */
 export const NonNegativeMoneySchema = MoneySchema.refine(
   (m) => !isNegative(m),
-  "Amount must not be negative",
+  'Amount must not be negative',
 );
-export const RateSchema = decimalString(RATE_DP, "Rate").transform((s) =>
-  rate(s),
-);
-export const QtySchema = decimalString(QTY_DP, "Quantity").transform((s) =>
-  qty(s),
-);
+export const RateSchema = decimalString(RATE_DP, 'Rate').transform((s) => rate(s));
+export const QtySchema = decimalString(QTY_DP, 'Quantity').transform((s) => qty(s));
 export const PositiveQtySchema = QtySchema.refine(
   (q) => new Decimal(q).gt(0),
-  "Quantity must be greater than zero",
+  'Quantity must be greater than zero',
 );
 /** 0.00 – 100.00 */
-export const PercentSchema = decimalString(2, "Percentage").refine(
+export const PercentSchema = decimalString(2, 'Percentage').refine(
   (s) => new Decimal(s).gte(0) && new Decimal(s).lte(100),
-  "Percentage must be between 0 and 100",
+  'Percentage must be between 0 and 100',
 );
 
 // ---------------------------------------------------------------------------
@@ -315,16 +299,16 @@ export const PercentSchema = decimalString(2, "Percentage").refine(
 // ---------------------------------------------------------------------------
 
 /** "1234.56" -> "1.234,56 €" */
-export function formatEur(m: Money | string, locale = "de-DE"): string {
+export function formatEur(m: Money | string, locale = 'de-DE'): string {
   const d = new Decimal(m);
   // Intl needs a JS number for formatting only; we are not computing with it.
   return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: "EUR",
+    style: 'currency',
+    currency: 'EUR',
   }).format(d.toNumber());
 }
 /** "0.1900" -> "19 %" */
-export function formatRatePercent(r: Rate | string, locale = "de-DE"): string {
+export function formatRatePercent(r: Rate | string, locale = 'de-DE'): string {
   const d = new Decimal(r).times(100);
   return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(d.toNumber())} %`;
 }

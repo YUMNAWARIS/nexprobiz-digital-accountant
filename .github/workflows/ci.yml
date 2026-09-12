@@ -21,11 +21,11 @@ jobs:
             POSTGRES_PASSWORD: fa_owner,
             POSTGRES_DB: freelancer_accounting,
           }
-        ports: ["5432:5432"]
+        ports: ['5432:5432']
         options: --health-cmd "pg_isready -U fa_owner" --health-interval 5s --health-timeout 3s --health-retries 10
       redis:
         image: redis:7-alpine
-        ports: ["6379:6379"]
+        ports: ['6379:6379']
         options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
     env:
       DATABASE_ADMIN_URL: postgres://fa_owner:fa_owner@localhost:5432/freelancer_accounting
@@ -83,11 +83,7 @@ jobs:
         run: pnpm --filter @fa/worker build --if-present
       - name: Build web
         run: pnpm --filter @fa/web build --if-present
-        env:
-          {
-            NEXT_PUBLIC_API_URL: http://localhost:8000,
-            NEXT_PUBLIC_ENVIRONMENT: sandbox,
-          }
+        env: { NEXT_PUBLIC_API_URL: http://localhost:8000, NEXT_PUBLIC_ENVIRONMENT: sandbox }
 
       - name: Playwright smoke (where environment available)
         if: ${{ false }} # enabled in P4 once apps/web + e2e exist

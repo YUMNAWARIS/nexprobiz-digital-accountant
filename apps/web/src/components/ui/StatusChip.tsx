@@ -1,0 +1,48 @@
+import { Chip } from '@mui/material';
+const COLORS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info'> = {
+  DRAFT: 'default',
+  FINALIZED: 'primary',
+  PARTIALLY_PAID: 'warning',
+  PAID: 'success',
+  CANCELLED: 'error',
+  POSTED: 'success',
+  REVERSED: 'error',
+  UPLOADED: 'default',
+  OCR_PROCESSING: 'info',
+  NEEDS_REVIEW: 'warning',
+  CONFIRMED: 'success',
+  FAILED: 'error',
+  UNREVIEWED: 'default',
+  BUSINESS: 'primary',
+  PERSONAL: 'default',
+  TRANSFER: 'info',
+  ACTIVE: 'success',
+  ARCHIVED: 'default',
+  COMPLETED: 'success',
+  PENDING: 'info',
+};
+const LABELS: Record<string, string> = {
+  DRAFT: 'Entwurf',
+  FINALIZED: 'Finalisiert',
+  PARTIALLY_PAID: 'Teilweise bezahlt',
+  PAID: 'Bezahlt',
+  CANCELLED: 'Storniert',
+  POSTED: 'Gebucht',
+  REVERSED: 'Storniert',
+  UPLOADED: 'Hochgeladen',
+  OCR_PROCESSING: 'Wird gelesen…',
+  NEEDS_REVIEW: 'Prüfen',
+  CONFIRMED: 'Bestätigt',
+  FAILED: 'Fehlgeschlagen',
+  UNREVIEWED: 'Ungeprüft',
+  BUSINESS: 'Geschäftlich',
+  PERSONAL: 'Privat',
+  TRANSFER: 'Umbuchung',
+  ACTIVE: 'Aktiv',
+  ARCHIVED: 'Archiviert',
+  COMPLETED: 'Fertig',
+  PENDING: 'Ausstehend',
+};
+export function StatusChip({ status }: { status: string }) {
+  return <Chip size="small" label={LABELS[status] ?? status} color={COLORS[status] ?? 'default'} />;
+}

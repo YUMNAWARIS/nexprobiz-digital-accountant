@@ -1,7 +1,7 @@
 /** §29 Dashboard · §30 EÜR · §31 VAT Preview — read-only, money as strings */
-import { z } from "zod";
-import { VatRegime } from "../enums";
-import { MoneySchema } from "../money";
+import { z } from 'zod';
+import { VatRegime } from '../enums';
+import { MoneySchema } from '../money';
 
 export const VatSummary = z.object({
   outputVat: MoneySchema,

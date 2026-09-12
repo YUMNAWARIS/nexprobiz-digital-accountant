@@ -1,0 +1,17 @@
+{
+  "name": "@fa/worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Receipt OCR queue consumer (§37/§38). Runs the worker entry of the @fa/api modular monolith.",
+  "scripts": {
+    "dev": "cd ../api && tsx watch --clear-screen=false src/worker/main.ts",
+    "build": "cd ../api && tsc -p tsconfig.build.json",
+    "start": "node ../api/dist/worker/main.js",
+    "lint": "echo \"worker sources live in apps/api/src/worker (linted there)\"",
+    "typecheck": "echo \"worker sources live in apps/api/src/worker (typechecked there)\"",
+    "test": "echo \"worker tests live in apps/api (src/worker/__tests__ + test/receipts.test.ts)\""
+  },
+  "dependencies": {
+    "@fa/api": "workspace:*"
+  }
+}

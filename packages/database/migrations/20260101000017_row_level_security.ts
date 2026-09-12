@@ -1,4 +1,4 @@
-import type { Knex } from "knex";
+import type { Knex } from 'knex';
 
 /**
  * ARCH-006 / SEC-004 — Row-Level Security on every tenant-owned table.
@@ -12,24 +12,24 @@ import type { Knex } from "knex";
  * are scoped through their parent.
  */
 const TENANT_TABLES = [
-  "business_profile_versions",
-  "clients",
-  "invoice_sequences",
-  "invoices",
-  "payments",
-  "documents",
-  "receipts",
-  "ocr_runs",
-  "expenses",
-  "bank_imports",
-  "bank_transactions",
-  "reconciliations",
-  "journal_entries",
-  "exports",
-  "audit_events",
+  'business_profile_versions',
+  'clients',
+  'invoice_sequences',
+  'invoices',
+  'payments',
+  'documents',
+  'receipts',
+  'ocr_runs',
+  'expenses',
+  'bank_imports',
+  'bank_transactions',
+  'reconciliations',
+  'journal_entries',
+  'exports',
+  'audit_events',
 ];
 
-const TENANT_EXPR = "current_setting('app.tenant_id', true)::uuid";
+const TENANT_EXPR = "NULLIF(current_setting('app.tenant_id', true), '')::uuid";
 
 export async function up(knex: Knex): Promise<void> {
   for (const table of TENANT_TABLES) {
@@ -42,16 +42,16 @@ export async function up(knex: Knex): Promise<void> {
     `);
   }
 
-  await knex.raw("ALTER TABLE invoice_lines ENABLE ROW LEVEL SECURITY");
-  await knex.raw("ALTER TABLE invoice_lines FORCE ROW LEVEL SECURITY");
+  await knex.raw('ALTER TABLE invoice_lines ENABLE ROW LEVEL SECURITY');
+  await knex.raw('ALTER TABLE invoice_lines FORCE ROW LEVEL SECURITY');
   await knex.raw(`
     CREATE POLICY tenant_isolation ON invoice_lines
       USING (EXISTS (SELECT 1 FROM invoices i WHERE i.id = invoice_lines.invoice_id AND i.tenant_id = ${TENANT_EXPR}))
       WITH CHECK (EXISTS (SELECT 1 FROM invoices i WHERE i.id = invoice_lines.invoice_id AND i.tenant_id = ${TENANT_EXPR}))
   `);
 
-  await knex.raw("ALTER TABLE journal_lines ENABLE ROW LEVEL SECURITY");
-  await knex.raw("ALTER TABLE journal_lines FORCE ROW LEVEL SECURITY");
+  await knex.raw('ALTER TABLE journal_lines ENABLE ROW LEVEL SECURITY');
+  await knex.raw('ALTER TABLE journal_lines FORCE ROW LEVEL SECURITY');
   await knex.raw(`
     CREATE POLICY tenant_isolation ON journal_lines
       USING (EXISTS (SELECT 1 FROM journal_entries e WHERE e.id = journal_lines.journal_entry_id AND e.tenant_id = ${TENANT_EXPR}))
@@ -60,16 +60,12 @@ export async function up(knex: Knex): Promise<void> {
 
   // The balance trigger and RLS-subquery both run as the invoking user; make the trigger
   // function SECURITY DEFINER so it can always see all lines of the entry being validated.
-  await knex.raw(
-    "ALTER FUNCTION assert_journal_entry_balanced() SECURITY DEFINER",
-  );
+  await knex.raw('ALTER FUNCTION assert_journal_entry_balanced() SECURITY DEFINER');
 }
 
 export async function down(knex: Knex): Promise<void> {
-  await knex.raw(
-    "ALTER FUNCTION assert_journal_entry_balanced() SECURITY INVOKER",
-  );
-  for (const table of [...TENANT_TABLES, "invoice_lines", "journal_lines"]) {
+  await knex.raw('ALTER FUNCTION assert_journal_entry_balanced() SECURITY INVOKER');
+  for (const table of [...TENANT_TABLES, 'invoice_lines', 'journal_lines']) {
     await knex.raw(`DROP POLICY IF EXISTS tenant_isolation ON ${table}`);
     await knex.raw(`ALTER TABLE ${table} NO FORCE ROW LEVEL SECURITY`);
     await knex.raw(`ALTER TABLE ${table} DISABLE ROW LEVEL SECURITY`);

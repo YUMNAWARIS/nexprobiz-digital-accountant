@@ -1,5 +1,6 @@
 /** §9.8 DocumentStoragePort, §9.9 QueuePort, OCR + e-invoice ports. Implementations live in infra/. */
-import type { DocumentType } from "@fa/contracts";
+import type { DocumentType } from '@fa/contracts';
+import type { AnyCtx } from '../context';
 
 export interface StoredBlob {
   blobName: string;
@@ -24,11 +25,7 @@ export interface DocumentStoragePort {
 }
 
 export interface QueuePort {
-  enqueue<T extends object>(
-    queue: string,
-    message: T,
-    opts?: { jobId?: string },
-  ): Promise<void>;
+  enqueue<T extends object>(queue: string, message: T, opts?: { jobId?: string }): Promise<void>;
   close(): Promise<void>;
 }
 
@@ -56,14 +53,8 @@ export interface GeneratedDocument {
 }
 /** §39 — XML is never generated inside InvoiceService. */
 export interface EInvoiceGenerator {
-  generate(
-    invoiceId: string,
-    ctx: import("../context").AnyCtx,
-  ): Promise<GeneratedDocument>;
+  generate(invoiceId: string, ctx: AnyCtx): Promise<GeneratedDocument>;
 }
 export interface InvoicePdfGenerator {
-  generate(
-    invoiceId: string,
-    ctx: import("../context").AnyCtx,
-  ): Promise<GeneratedDocument>;
+  generate(invoiceId: string, ctx: AnyCtx): Promise<GeneratedDocument>;
 }

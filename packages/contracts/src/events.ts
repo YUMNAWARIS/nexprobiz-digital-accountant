@@ -2,12 +2,12 @@
  * §34 Domain Event Envelope + §35 MVP Event Schemas (all twelve, v1).
  * Rows in outbox_events carry exactly these payloads.
  */
-import { z } from "zod";
-import { BankClassification, ReconciliationTarget } from "./enums";
-import { MoneySchema } from "./money";
+import { z } from 'zod';
+import { BankClassification, ReconciliationTarget } from './enums';
+import { MoneySchema } from './money';
 
 const Uuid = z.string().uuid();
-const IsoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD");
+const IsoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD');
 const IsoDateTime = z.string().datetime();
 
 // ---- §35 payloads -----------------------------------------------------------
@@ -41,7 +41,7 @@ export const ReceiptUploadedV1 = z.object({
 export const ReceiptExtractedV1 = z.object({
   receiptId: Uuid,
   ocrRunId: Uuid,
-  confidence: z.string().regex(/^\d\.\d{4}$/, "Expected 0.0000–1.0000"),
+  confidence: z.string().regex(/^\d\.\d{4}$/, 'Expected 0.0000–1.0000'),
 });
 
 export const ExpensePostedV1 = z.object({
@@ -87,74 +87,70 @@ export const DatevExportGeneratedV1 = z.object({
 export const EVENT_REGISTRY = {
   InvoiceFinalized: {
     version: 1,
-    aggregateType: "Invoice",
+    aggregateType: 'Invoice',
     payload: InvoiceFinalizedV1,
   },
   InvoiceCancelled: {
     version: 1,
-    aggregateType: "Invoice",
+    aggregateType: 'Invoice',
     payload: InvoiceCancelledV1,
   },
   PaymentRecorded: {
     version: 1,
-    aggregateType: "Payment",
+    aggregateType: 'Payment',
     payload: PaymentRecordedV1,
   },
   ReceiptUploaded: {
     version: 1,
-    aggregateType: "Receipt",
+    aggregateType: 'Receipt',
     payload: ReceiptUploadedV1,
   },
   ReceiptExtracted: {
     version: 1,
-    aggregateType: "Receipt",
+    aggregateType: 'Receipt',
     payload: ReceiptExtractedV1,
   },
   ExpensePosted: {
     version: 1,
-    aggregateType: "Expense",
+    aggregateType: 'Expense',
     payload: ExpensePostedV1,
   },
   ExpenseReversed: {
     version: 1,
-    aggregateType: "Expense",
+    aggregateType: 'Expense',
     payload: ExpenseReversedV1,
   },
   BankTransactionImported: {
     version: 1,
-    aggregateType: "BankTransaction",
+    aggregateType: 'BankTransaction',
     payload: BankTransactionImportedV1,
   },
   BankTransactionClassified: {
     version: 1,
-    aggregateType: "BankTransaction",
+    aggregateType: 'BankTransaction',
     payload: BankTransactionClassifiedV1,
   },
   TransactionReconciled: {
     version: 1,
-    aggregateType: "Reconciliation",
+    aggregateType: 'Reconciliation',
     payload: TransactionReconciledV1,
   },
   BusinessProfileChanged: {
     version: 1,
-    aggregateType: "BusinessProfile",
+    aggregateType: 'BusinessProfile',
     payload: BusinessProfileChangedV1,
   },
   DatevExportGenerated: {
     version: 1,
-    aggregateType: "Export",
+    aggregateType: 'Export',
     payload: DatevExportGeneratedV1,
   },
 } as const;
 
 export type EventType = keyof typeof EVENT_REGISTRY;
-export const EventTypeSchema = z.enum(
-  Object.keys(EVENT_REGISTRY) as [EventType, ...EventType[]],
-);
+export const EventTypeSchema = z.enum(Object.keys(EVENT_REGISTRY) as [EventType, ...EventType[]]);
 
-export type EventPayload<T extends EventType> = z.infer<
-  (typeof EVENT_REGISTRY)[T]["payload"]
->;
+export type EventPayload<T extends EventType> = z.infer<(typeof EVENT_REGISTRY)[T]['payload']>;
 
 // ---- §34 envelope -----------------------------------------------------------
 
@@ -183,16 +179,13 @@ export interface DomainEvent<T extends EventType = EventType> {
 }
 
 /** Validates payload against the registry. Throws ZodError on mismatch. */
-export function parseEvent<T extends EventType>(
-  eventType: T,
-  payload: unknown,
-): EventPayload<T> {
+export function parseEvent<T extends EventType>(eventType: T, payload: unknown): EventPayload<T> {
   return EVENT_REGISTRY[eventType].payload.parse(payload);
 }
 
 // ---- §37 OCR queue message --------------------------------------------------
 
-export const RECEIPT_OCR_QUEUE = "receipt-ocr";
+export const RECEIPT_OCR_QUEUE = 'receipt-ocr';
 
 export const ReceiptOcrMessageV1 = z.object({
   version: z.literal(1),

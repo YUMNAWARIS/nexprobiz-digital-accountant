@@ -1,16 +1,8 @@
 /** §22 Invoice REST Contracts · §11.8 invoices · §11.9 invoice_lines · §14 state machine */
-import { z } from "zod";
-import { InvoiceStatus, TaxTreatment } from "../enums";
-import { MoneySchema, PositiveQtySchema, RateSchema } from "../money";
-import {
-  body,
-  DateRangeQuery,
-  IsoDate,
-  IsoDateTime,
-  PageQuery,
-  Uuid,
-  paginated,
-} from "./common";
+import { z } from 'zod';
+import { InvoiceStatus, TaxTreatment } from '../enums';
+import { MoneySchema, PositiveQtySchema, RateSchema } from '../money';
+import { body, DateRangeQuery, IsoDate, IsoDateTime, PageQuery, Uuid, paginated } from './common';
 
 /**
  * A line as submitted by the client. Note there is NO net/tax/gross here —
@@ -20,13 +12,13 @@ export const InvoiceLineInput = z
   .object({
     description: z.string().trim().min(1).max(2000),
     quantity: PositiveQtySchema,
-    unit: z.string().trim().min(1).max(30).default("unit"),
+    unit: z.string().trim().min(1).max(30).default('unit'),
     unitPrice: z
       .string()
       .trim()
       .regex(
         /^-?\d+(\.\d{1,4})?$/,
-        "unitPrice must be a decimal string with up to 4 decimal places",
+        'unitPrice must be a decimal string with up to 4 decimal places',
       ),
     taxTreatment: TaxTreatment,
   })
@@ -103,7 +95,7 @@ export const InvoiceView = z.object({
   issueDate: IsoDate.nullable(),
   serviceDate: IsoDate.nullable(),
   dueDate: IsoDate.nullable(),
-  currency: z.literal("EUR"),
+  currency: z.literal('EUR'),
   subtotalNet: MoneySchema,
   taxTotal: MoneySchema,
   grossTotal: MoneySchema,

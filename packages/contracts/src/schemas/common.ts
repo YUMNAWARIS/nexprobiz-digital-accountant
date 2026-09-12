@@ -1,13 +1,22 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const Uuid = z.string().uuid();
+const isCalendarDate = (s: string): boolean => {
+  const [y, m, d] = s.split('-').map(Number) as [number, number, number];
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+};
 export const IsoDate = z
   .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD");
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD')
+  .refine(
+    (s) => !/^\d{4}-\d{2}-\d{2}$/.test(s) || isCalendarDate(s),
+    'Expected a valid calendar date',
+  );
 export const IsoDateTime = z.string().datetime({ offset: true });
 export const Email = z.string().trim().toLowerCase().email().max(320);
 export const CountryCode = z.string().length(2).toUpperCase();
-export const Currency = z.literal("EUR"); // §4: EUR only
+export const Currency = z.literal('EUR'); // §4: EUR only
 
 /**
  * SEC-003: "Never accept tenantId from frontend request bodies."
@@ -15,20 +24,28 @@ export const Currency = z.literal("EUR"); // §4: EUR only
  * .strict() means an unknown key is a 400, not silently dropped.
  */
 const FORBIDDEN_BODY_KEYS = [
-  "tenant_id",
-  "tenantId",
-  "tenant",
-  "user_id",
-  "userId",
-  "actor_user_id",
+  'tenant_id',
+  'tenantId',
+  'tenant',
+  'user_id',
+  'userId',
+  'actor_user_id',
 ] as const;
 
-export function body<T extends z.ZodRawShape>(shape: T) {
+type StrictObject<T extends z.ZodRawShape> = z.ZodObject<T, 'strict'>;
+/** Preprocessed strict object whose input type is still the object's input (so forms can type against it). */
+export type BodySchema<T extends z.ZodRawShape> = z.ZodEffects<
+  StrictObject<T>,
+  z.output<StrictObject<T>>,
+  z.input<StrictObject<T>>
+>;
+
+export function body<T extends z.ZodRawShape>(shape: T): BodySchema<T> {
   const inner = z.object(shape).strict();
   // preprocess sees the RAW input, before .strict() strips unknown keys — so the
   // refusal names the offending field explicitly instead of a generic unrecognized_keys.
   return z.preprocess((raw, ctx) => {
-    if (raw !== null && typeof raw === "object" && !Array.isArray(raw)) {
+    if (raw !== null && typeof raw === 'object' && !Array.isArray(raw)) {
       for (const k of FORBIDDEN_BODY_KEYS) {
         if (k in raw) {
           ctx.addIssue({
@@ -40,7 +57,7 @@ export function body<T extends z.ZodRawShape>(shape: T) {
       }
     }
     return raw;
-  }, inner);
+  }, inner) as unknown as BodySchema<T>;
 }
 
 // ---- pagination (§21, §22, §27) ----------------------------------------------

@@ -10,10 +10,10 @@ services:
       POSTGRES_USER: fa_owner
       POSTGRES_PASSWORD: fa_owner
       POSTGRES_DB: freelancer_accounting
-    ports: ["5432:5432"]
-    volumes: ["fa-postgres-data:/var/lib/postgresql/data"]
+    ports: ['5432:5432']
+    volumes: ['fa-postgres-data:/var/lib/postgresql/data']
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fa_owner -d freelancer_accounting"]
+      test: ['CMD-SHELL', 'pg_isready -U fa_owner -d freelancer_accounting']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -22,11 +22,11 @@ services:
     image: redis:7-alpine
     container_name: fa-redis
     restart: unless-stopped
-    ports: ["6379:6379"]
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes: ["fa-redis-data:/data"]
+    ports: ['6379:6379']
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes: ['fa-redis-data:/data']
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -39,10 +39,10 @@ services:
     environment:
       MINIO_ROOT_USER: fa_minio
       MINIO_ROOT_PASSWORD: fa_minio_secret
-    ports: ["9000:9000", "9001:9001"]
-    volumes: ["fa-minio-data:/data"]
+    ports: ['9000:9000', '9001:9001']
+    volumes: ['fa-minio-data:/data']
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ['CMD', 'mc', 'ready', 'local']
       interval: 5s
       timeout: 3s
       retries: 10
@@ -63,12 +63,12 @@ services:
     image: dpage/pgadmin4:latest
     container_name: fa-pgadmin
     restart: unless-stopped
-    profiles: ["tools"]
+    profiles: ['tools']
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
-    ports: ["8888:80"]
-    volumes: ["fa-pgadmin-data:/var/lib/pgadmin"]
+    ports: ['8888:80']
+    volumes: ['fa-pgadmin-data:/var/lib/pgadmin']
 
 volumes:
   fa-postgres-data:

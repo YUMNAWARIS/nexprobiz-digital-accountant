@@ -1,8 +1,8 @@
 /** §23 Manual Payment REST Contract · §11.10 payments */
-import { z } from "zod";
-import { PaymentMethod, PaymentStatus } from "../enums";
-import { MoneySchema, PositiveMoneySchema } from "../money";
-import { body, IsoDate, IsoDateTime, Uuid } from "./common";
+import { z } from 'zod';
+import { PaymentMethod, PaymentStatus } from '../enums';
+import { MoneySchema, PositiveMoneySchema } from '../money';
+import { body, IsoDate, IsoDateTime, Uuid } from './common';
 
 export const RecordPaymentRequest = body({
   amount: PositiveMoneySchema, // amount > 0

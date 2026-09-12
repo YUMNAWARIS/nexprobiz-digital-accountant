@@ -1,6 +1,6 @@
-import { Queue } from "bullmq";
-import IORedis from "ioredis";
-import type { QueuePort } from "@/core/ports";
+import { Queue } from 'bullmq';
+import IORedis from 'ioredis';
+import type { QueuePort } from '@/core/ports';
 
 /** §37 — retry ≤ 3 is a BullMQ job option; the worker sets FAILED after the last attempt. */
 export class BullMqQueue implements QueuePort {
@@ -16,7 +16,7 @@ export class BullMqQueue implements QueuePort {
         connection: this.conn,
         defaultJobOptions: {
           attempts: 3,
-          backoff: { type: "exponential", delay: 2000 },
+          backoff: { type: 'exponential', delay: 2000 },
           removeOnComplete: 1000,
           removeOnFail: 5000,
         },
@@ -38,7 +38,7 @@ export class BullMqQueue implements QueuePort {
   }
   async healthCheck(): Promise<boolean> {
     try {
-      return (await this.conn.ping()) === "PONG";
+      return (await this.conn.ping()) === 'PONG';
     } catch {
       return false;
     }

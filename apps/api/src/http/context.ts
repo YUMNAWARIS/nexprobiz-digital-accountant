@@ -1,8 +1,8 @@
-import type { Request } from "express";
-import type { RequestCtx } from "@/core/context";
-import { UnauthorizedError } from "@/core/errors";
-import type { Clock } from "@/core/clock";
-import { reqId } from "@/http/types";
+import type { Request } from 'express';
+import type { RequestCtx } from '@/core/context';
+import { UnauthorizedError } from '@/core/errors';
+import type { Clock } from '@/core/clock';
+import { reqId } from '@/http/types';
 
 /** The ONE place req.auth is turned into a RequestCtx. */
 export function makeReqCtx(clock: Clock) {

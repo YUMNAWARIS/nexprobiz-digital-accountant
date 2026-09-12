@@ -1,7 +1,7 @@
-import type { Actor } from "@/core/context";
-import type { Logger } from "pino";
+import type { Actor } from '@/core/context';
+import type { Logger } from 'pino';
 
-declare module "express-serve-static-core" {
+declare module 'express-serve-static-core' {
   interface Request {
     log: Logger;
     auth?: Actor;
@@ -9,5 +9,7 @@ declare module "express-serve-static-core" {
 }
 /** pino-http types req.id as ReqId; normalize to string once. */
 export function reqId(req: { id?: unknown }): string {
-  return typeof req.id === "string" ? req.id : String(req.id ?? "unknown");
+  if (typeof req.id === 'string') return req.id;
+  if (typeof req.id === 'number') return String(req.id);
+  return 'unknown';
 }

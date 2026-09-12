@@ -1,16 +1,8 @@
 /** §25 Expense REST Contracts · §11.14 expenses · §15 state machine */
-import { z } from "zod";
-import { ExpenseStatus, TaxTreatment } from "../enums";
-import { MoneySchema, NonNegativeMoneySchema, PercentSchema } from "../money";
-import {
-  body,
-  DateRangeQuery,
-  IsoDate,
-  IsoDateTime,
-  PageQuery,
-  Uuid,
-  paginated,
-} from "./common";
+import { z } from 'zod';
+import { ExpenseStatus, TaxTreatment } from '../enums';
+import { MoneySchema, NonNegativeMoneySchema, PercentSchema } from '../money';
+import { body, DateRangeQuery, IsoDate, IsoDateTime, PageQuery, Uuid, paginated } from './common';
 
 export const CreateExpenseRequest = body({
   receiptId: Uuid.optional().nullable(),
@@ -23,7 +15,7 @@ export const CreateExpenseRequest = body({
   netAmount: NonNegativeMoneySchema,
   taxAmount: NonNegativeMoneySchema,
   grossAmount: NonNegativeMoneySchema,
-  businessPercentage: PercentSchema.default("100.00"),
+  businessPercentage: PercentSchema.default('100.00'),
 });
 export type CreateExpenseRequest = z.infer<typeof CreateExpenseRequest>;
 
@@ -88,13 +80,11 @@ export const AccountCategoryView = z.object({
   code: z.string(),
   nameDe: z.string(),
   nameEn: z.string(),
-  type: z.enum(["REVENUE", "EXPENSE"]),
+  type: z.enum(['REVENUE', 'EXPENSE']),
   active: z.boolean(),
 });
 export type AccountCategoryView = z.infer<typeof AccountCategoryView>;
 export const AccountCategoryListResponse = z.object({
   data: z.array(AccountCategoryView),
 });
-export type AccountCategoryListResponse = z.infer<
-  typeof AccountCategoryListResponse
->;
+export type AccountCategoryListResponse = z.infer<typeof AccountCategoryListResponse>;

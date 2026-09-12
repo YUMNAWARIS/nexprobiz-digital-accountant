@@ -2,7 +2,7 @@
  * §18 Error Contract. Every API error body has exactly this shape.
  * Required: status, code, message, requestId. Optional: details.
  */
-import { z } from "zod";
+import { z } from 'zod';
 
 export const ErrorDetail = z.object({
   field: z.string(),
@@ -99,6 +99,4 @@ export const ERROR_CODES = {
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_CODES;
-export const ErrorCodeSchema = z.enum(
-  Object.keys(ERROR_CODES) as [ErrorCode, ...ErrorCode[]],
-);
+export const ErrorCodeSchema = z.enum(Object.keys(ERROR_CODES) as [ErrorCode, ...ErrorCode[]]);

@@ -1,7 +1,7 @@
 /** Story 15.1 Audit API · §11.25 audit_events */
-import { z } from "zod";
-import { AuditEntityType, AuditEventType } from "../enums";
-import { IsoDateTime, PageQuery, Uuid, paginated } from "./common";
+import { z } from 'zod';
+import { AuditEntityType, AuditEventType } from '../enums';
+import { IsoDateTime, PageQuery, Uuid, paginated } from './common';
 
 export const ListAuditQuery = PageQuery.extend({
   eventType: AuditEventType.optional(),
