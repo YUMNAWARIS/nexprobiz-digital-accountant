@@ -1,0 +1,51 @@
+{
+  "name": "@fa/database",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Knex schema, migrations, seeds and row types (spec \u00a711)",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "migrations",
+    "seeds",
+    "knexfile.ts"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "lint": "eslint src migrations seeds knexfile.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "echo \"no unit tests; schema is exercised by apps/api integration tests\"",
+    "knex": "tsx node_modules/knex/bin/cli.js --knexfile knexfile.ts",
+    "migrate": "tsx node_modules/knex/bin/cli.js --knexfile knexfile.ts migrate:latest",
+    "migrate:make": "tsx node_modules/knex/bin/cli.js --knexfile knexfile.ts migrate:make -x ts",
+    "migrate:status": "tsx node_modules/knex/bin/cli.js --knexfile knexfile.ts migrate:status",
+    "rollback": "tsx node_modules/knex/bin/cli.js --knexfile knexfile.ts migrate:rollback",
+    "rollback:all": "tsx node_modules/knex/bin/cli.js --knexfile knexfile.ts migrate:rollback --all",
+    "seed": "tsx node_modules/knex/bin/cli.js --knexfile knexfile.ts seed:run",
+    "reset": "tsx node_modules/knex/bin/cli.js --knexfile knexfile.ts migrate:rollback --all && tsx node_modules/knex/bin/cli.js --knexfile knexfile.ts migrate:latest && tsx node_modules/knex/bin/cli.js --knexfile knexfile.ts seed:run"
+  },
+  "dependencies": {
+    "@fa/contracts": "workspace:*",
+    "dotenv": "^16.4.7",
+    "knex": "^3.1.0",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@fa/config": "workspace:*",
+    "@types/pg": "^8.11.10",
+    "eslint": "^9.18.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.19.1"
+  }
+}

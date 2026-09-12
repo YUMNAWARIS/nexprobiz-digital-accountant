@@ -1,0 +1,38 @@
+{
+  "name": "freelancer-accounting",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Freelancer Accounting SaaS - Germany Sandbox MVP",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:api": "pnpm --filter @fa/api dev",
+    "dev:web": "pnpm --filter @fa/web dev",
+    "dev:worker": "pnpm --filter @fa/worker dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @fa/e2e test",
+    "arch": "pnpm --filter @fa/api arch",
+    "db:migrate": "pnpm --filter @fa/database migrate",
+    "db:rollback": "pnpm --filter @fa/database rollback",
+    "db:seed": "pnpm --filter @fa/database seed",
+    "db:reset": "pnpm --filter @fa/database reset",
+    "docker:up": "docker compose -f infrastructure/docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f infrastructure/docker/docker-compose.yml down",
+    "docker:logs": "docker compose -f infrastructure/docker/docker-compose.yml logs -f",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "dependency-cruiser": "^16.9.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "extends": "@fa/config/tsconfig.node.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "composite": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "migrations/**/*.ts",
+    "seeds/**/*.ts",
+    "knexfile.ts"
+  ]
+}

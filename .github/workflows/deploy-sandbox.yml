@@ -1,0 +1,15 @@
+# §47 Sandbox Deployment Pipeline — AUTHORED BUT INACTIVE.
+# Azure was excluded (docs/DEVIATIONS.md); hosting target deferred. Enable by removing `if: false`
+# and filling in the deploy steps for the chosen host.
+name: deploy-sandbox
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "1. CI  2. login  3. provision  4-7. build+deploy api/worker  8. migrations  9-10. build+deploy web  11. seed  12. health check  13. smoke"
