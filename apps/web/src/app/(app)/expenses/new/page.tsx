@@ -1,6 +1,7 @@
 'use client';
 import { Card, CardContent } from '@mui/material';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Suspense } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { ExpenseForm } from '@/features/expenses/components/ExpenseForm';
@@ -12,13 +13,11 @@ function NewExpenseInner() {
   const receiptId = useSearchParams().get('receiptId') ?? '';
   const receipt = useReceipt(receiptId);
   const create = useCreateExpense();
+  const t = useTranslations('expenses');
   if (receiptId && receipt.isLoading) return null;
   return (
     <>
-      <PageHeader
-        title="Neue Ausgabe"
-        subtitle="Wird als Entwurf gespeichert; erst das Buchen erzeugt einen Journaleintrag."
-      />
+      <PageHeader title={t('new')} subtitle={t('newSubtitle')} />
       <Card>
         <CardContent>
           <ExpenseForm

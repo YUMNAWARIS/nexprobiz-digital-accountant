@@ -2,7 +2,7 @@
   "name": "@fa/api",
   "version": "1.0.0",
   "private": true,
-  "description": "Express 5 + TypeScript modular monolith API (spec §9)",
+  "description": "Express 5 + TypeScript modular monolith API (spec \u00a79)",
   "main": "dist/main.js",
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/main.ts",
@@ -15,7 +15,9 @@
     "test:integration": "jest --selectProjects integration --runInBand",
     "openapi": "tsx src/http/openapi-cli.ts > ../../docs/api/openapi.json",
     "hash-password": "tsx scripts/hash-password.ts",
-    "arch": "depcruise src --config .dependency-cruiser.cjs"
+    "arch": "depcruise src --config .dependency-cruiser.cjs",
+    "dev:worker": "tsx watch --clear-screen=false src/worker/main.ts",
+    "start:worker": "node dist/worker/main.js"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.0",

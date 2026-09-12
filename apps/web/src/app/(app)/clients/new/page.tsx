@@ -1,5 +1,6 @@
 'use client';
 import { Card, CardContent } from '@mui/material';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { ClientForm } from '@/features/clients/components/ClientForm';
@@ -8,9 +9,10 @@ import { useCreateClient } from '@/features/clients/hooks';
 export default function NewClientPage() {
   const router = useRouter();
   const create = useCreateClient();
+  const t = useTranslations('clients');
   return (
     <>
-      <PageHeader title="Neuer Kunde" />
+      <PageHeader title={t('new')} />
       <Card>
         <CardContent>
           <ClientForm

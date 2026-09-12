@@ -3,19 +3,24 @@ import AddIcon from '@mui/icons-material/Add';
 import { Button, Card, MenuItem, Stack, TextField } from '@mui/material';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Suspense, useState } from 'react';
 import { INVOICE_STATUS, type InvoiceStatus } from '@fa/contracts';
 import { DataTable } from '@/components/ui/DataTable';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { useInvoices } from '@/features/invoices/hooks';
-import { date, eur } from '@/lib/format';
+import { useFormat } from '@/lib/format';
 
 function InvoicesPageInner() {
   const initial = useSearchParams().get('status') as InvoiceStatus | null;
   const [status, setStatus] = useState<InvoiceStatus | ''>(initial ?? '');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const t = useTranslations('invoices');
+  const tc = useTranslations('common');
+  const ts = useTranslations('status');
+  const { date, eur } = useFormat();
   const q = useInvoices({
     status: status || undefined,
     search: search || undefined,
@@ -25,17 +30,17 @@ function InvoicesPageInner() {
   return (
     <>
       <PageHeader
-        title="Rechnungen"
+        title={t('title')}
         actions={
           <Button component={Link} href="/invoices/new" variant="contained" startIcon={<AddIcon />}>
-            Neue Rechnung
+            {t('new')}
           </Button>
         }
       />
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
         <TextField
           size="small"
-          label="Suchen (Nummer, Kunde)"
+          label={t('searchLabel')}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -46,7 +51,7 @@ function InvoicesPageInner() {
         <TextField
           size="small"
           select
-          label="Status"
+          label={tc('status')}
           value={status}
           onChange={(e) => {
             setStatus(e.target.value as InvoiceStatus | '');
@@ -54,10 +59,10 @@ function InvoicesPageInner() {
           }}
           sx={{ minWidth: 180 }}
         >
-          <MenuItem value="">Alle</MenuItem>
+          <MenuItem value="">{tc('all')}</MenuItem>
           {INVOICE_STATUS.map((s) => (
             <MenuItem key={s} value={s}>
-              {s}
+              {ts(s)}
             </MenuItem>
           ))}
         </TextField>
@@ -70,18 +75,26 @@ function InvoicesPageInner() {
           getRowId={(r) => r.id}
           rowHref={(r) => `/invoices/${r.id}`}
           columns={[
-            { key: 'number', header: 'Nummer', render: (r) => r.invoiceNumber ?? <em>Entwurf</em> },
-            { key: 'client', header: 'Kunde', render: (r) => r.clientName ?? '—' },
-            { key: 'issue', header: 'Datum', render: (r) => date(r.issueDate) },
-            { key: 'due', header: 'Fällig', render: (r) => date(r.dueDate) },
-            { key: 'gross', header: 'Brutto', align: 'right', render: (r) => eur(r.grossTotal) },
+            {
+              key: 'number',
+              header: t('number'),
+              render: (r) => r.invoiceNumber ?? <em>{t('draft')}</em>,
+            },
+            { key: 'client', header: t('client'), render: (r) => r.clientName ?? '—' },
+            { key: 'issue', header: tc('date'), render: (r) => date(r.issueDate) },
+            { key: 'due', header: t('due'), render: (r) => date(r.dueDate) },
+            { key: 'gross', header: tc('gross'), align: 'right', render: (r) => eur(r.grossTotal) },
             {
               key: 'open',
-              header: 'Offen',
+              header: t('open'),
               align: 'right',
               render: (r) => eur(r.outstandingAmount),
             },
-            { key: 'status', header: 'Status', render: (r) => <StatusChip status={r.status} /> },
+            {
+              key: 'status',
+              header: tc('status'),
+              render: (r) => <StatusChip status={r.status} />,
+            },
           ]}
           pagination={q.data ? { ...q.data.meta, onPageChange: setPage } : undefined}
         />

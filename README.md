@@ -21,6 +21,12 @@ pnpm db:migrate && pnpm db:seed         # 17 migrations, 26 tables, reference da
 pnpm dev:api                            # http://localhost:8000  ·  Swagger: /api/docs  ·  /health/ready
 ```
 
+## Language
+
+The web app is bilingual: **German by default**, switchable to English with the `DE | EN` toggle in
+the app bar (persisted in the `fa_locale` cookie; URLs do not change). Regulatory outputs — invoice
+PDF, XRechnung, DATEV file — are always German. See `docs/stories/EPIC-18-language-toggle.md`.
+
 ## Checks
 
 ```bash

@@ -1,6 +1,6 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Grid, Stack, TextField } from '@mui/material';
+import { useTranslations } from 'next-intl';
 import { Controller, useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { CreateClientRequest, type ClientView } from '@fa/contracts';
@@ -9,6 +9,7 @@ type FormIn = z.input<typeof CreateClientRequest>;
 type FormOut = z.output<typeof CreateClientRequest>;
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { FormTextField } from '@/components/ui/FormTextField';
+import { useZodResolver } from '@/i18n/useZodResolver';
 
 const EMPTY: FormIn = {
   name: '',
@@ -33,8 +34,10 @@ export function ClientForm({
   pending: boolean;
   error: unknown;
 }) {
+  const t = useTranslations('clients');
+  const tc = useTranslations('common');
   const form = useForm<FormIn, unknown, FormOut>({
-    resolver: zodResolver(CreateClientRequest),
+    resolver: useZodResolver(CreateClientRequest),
     defaultValues: current
       ? {
           name: current.name,
@@ -56,28 +59,28 @@ export function ClientForm({
         <ErrorAlert error={error} />
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="name" label="Firma / Name" autoFocus />
+            <FormTextField control={c} name="name" label={t('companyName')} autoFocus />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="contactName" label="Ansprechpartner" nullable />
+            <FormTextField control={c} name="contactName" label={t('contact')} nullable />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="email" label="E-Mail" nullable />
+            <FormTextField control={c} name="email" label={t('email')} nullable />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="vatId" label="USt-IdNr." nullable />
+            <FormTextField control={c} name="vatId" label={t('vatId')} nullable />
           </Grid>
           <Grid size={{ xs: 12 }}>
-            <FormTextField control={c} name="street" label="Straße" nullable />
+            <FormTextField control={c} name="street" label={t('street')} nullable />
           </Grid>
           <Grid size={{ xs: 4 }}>
-            <FormTextField control={c} name="postalCode" label="PLZ" nullable />
+            <FormTextField control={c} name="postalCode" label={t('postalCode')} nullable />
           </Grid>
           <Grid size={{ xs: 5 }}>
-            <FormTextField control={c} name="city" label="Ort" nullable />
+            <FormTextField control={c} name="city" label={t('city')} nullable />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <FormTextField control={c} name="country" label="Land" />
+            <FormTextField control={c} name="country" label={t('country')} />
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
             <Controller
@@ -86,7 +89,7 @@ export function ClientForm({
               render={({ field, fieldState }) => (
                 <TextField
                   type="number"
-                  label="Zahlungsziel (Tage, optional)"
+                  label={t('paymentTermDays')}
                   fullWidth
                   {...field}
                   value={field.value ?? ''}
@@ -106,7 +109,7 @@ export function ClientForm({
           disabled={pending}
           sx={{ alignSelf: 'flex-start' }}
         >
-          Speichern
+          {tc('save')}
         </Button>
       </Stack>
     </form>

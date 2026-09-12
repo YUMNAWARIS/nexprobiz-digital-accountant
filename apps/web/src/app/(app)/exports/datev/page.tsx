@@ -10,11 +10,11 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
-import { CreateDatevExportRequest, SANDBOX } from '@fa/contracts';
+import { CreateDatevExportRequest } from '@fa/contracts';
 import { DataTable } from '@/components/ui/DataTable';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { FormTextField } from '@/components/ui/FormTextField';
@@ -22,7 +22,8 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { datevApi } from '@/features/datev/api';
 import { useCreateDatevExport, useExports } from '@/features/datev/hooks';
-import { date, dateTime } from '@/lib/format';
+import { useZodResolver } from '@/i18n/useZodResolver';
+import { useFormat } from '@/lib/format';
 
 const S = CreateDatevExportRequest;
 type In = z.input<typeof S>;
@@ -34,8 +35,12 @@ export default function DatevExportPage() {
   const create = useCreateDatevExport();
   const exports = useExports();
   const [downloadError, setDownloadError] = useState<unknown>(null);
+  const t = useTranslations('datev');
+  const tc = useTranslations('common');
+  const tsb = useTranslations('sandbox');
+  const { date, dateTime } = useFormat();
   const form = useForm<In, unknown, Out>({
-    resolver: zodResolver(S),
+    resolver: useZodResolver(S),
     defaultValues: {
       periodStart: `${year}-01-01`,
       periodEnd: `${year}-12-31`,
@@ -45,19 +50,18 @@ export default function DatevExportPage() {
   });
   return (
     <>
-      <PageHeader title="DATEV-Export" />
+      <PageHeader title={t('title')} />
       <Alert severity="warning" sx={{ mb: 2 }}>
-        {SANDBOX.DATEV_DISCLAIMER}
+        {tsb('datevDisclaimer')}
       </Alert>
       <Stack spacing={2}>
         <Card>
           <CardContent>
             <Typography variant="subtitle1" gutterBottom>
-              Buchungsstapel erzeugen
+              {t('generateTitle')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Enthält ausschließlich gebuchte Journaleinträge im Zeitraum (keine Entwürfe). Format
-              EXTF 700, Kategorie 21, CP1252, Semikolon-getrennt.
+              {t('generateHint')}
             </Typography>
             <ErrorAlert error={create.error} />
             <form
@@ -75,7 +79,7 @@ export default function DatevExportPage() {
                   <FormTextField
                     control={form.control}
                     name="periodStart"
-                    label="Von"
+                    label={tc('from')}
                     type="date"
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
@@ -84,7 +88,7 @@ export default function DatevExportPage() {
                   <FormTextField
                     control={form.control}
                     name="periodEnd"
-                    label="Bis"
+                    label={tc('to')}
                     type="date"
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
@@ -93,21 +97,21 @@ export default function DatevExportPage() {
                   <FormTextField
                     control={form.control}
                     name="beraternummer"
-                    label="Beraternummer"
-                    helperText="4–7 Ziffern"
+                    label={t('beraternummer')}
+                    helperText={t('beraternummerHint')}
                   />
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <FormTextField
                     control={form.control}
                     name="mandantennummer"
-                    label="Mandantennummer"
-                    helperText="1–5 Ziffern"
+                    label={t('mandantennummer')}
+                    helperText={t('mandantennummerHint')}
                   />
                 </Grid>
               </Grid>
               <Button type="submit" variant="contained" sx={{ mt: 2 }} disabled={create.isPending}>
-                {create.isPending ? 'Erzeuge…' : 'Export erzeugen & herunterladen'}
+                {create.isPending ? t('generating') : t('generate')}
               </Button>
             </form>
           </CardContent>
@@ -115,7 +119,7 @@ export default function DatevExportPage() {
         <Card>
           <CardContent>
             <Typography variant="subtitle1" gutterBottom>
-              Bisherige Exporte
+              {t('history')}
             </Typography>
             <ErrorAlert error={downloadError} />
             <DataTable
@@ -124,16 +128,20 @@ export default function DatevExportPage() {
               error={exports.error}
               getRowId={(r) => r.id}
               columns={[
-                { key: 'created', header: 'Erzeugt', render: (r) => dateTime(r.createdAt) },
+                { key: 'created', header: t('created'), render: (r) => dateTime(r.createdAt) },
                 {
                   key: 'period',
-                  header: 'Zeitraum',
+                  header: t('period'),
                   render: (r) => `${date(r.periodStart)} – ${date(r.periodEnd)}`,
                 },
-                { key: 'fmt', header: 'Format', render: (r) => `EXTF ${r.formatVersion ?? '—'}` },
+                {
+                  key: 'fmt',
+                  header: t('format'),
+                  render: (r) => `EXTF ${r.formatVersion ?? '—'}`,
+                },
                 {
                   key: 'status',
-                  header: 'Status',
+                  header: tc('status'),
                   render: (r) => <StatusChip status={r.status} />,
                 },
                 {
@@ -144,7 +152,7 @@ export default function DatevExportPage() {
                     r.status === 'COMPLETED' ? (
                       <IconButton
                         size="small"
-                        aria-label="Herunterladen"
+                        aria-label={tc('download')}
                         onClick={() => datevApi.download(r).catch(setDownloadError)}
                       >
                         <DownloadIcon fontSize="small" />

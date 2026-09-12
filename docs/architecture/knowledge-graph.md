@@ -181,7 +181,9 @@ app/(auth)/{login,register} · app/(app)/{onboarding,dashboard,audit,settings/bu
             receipts[/[id]],expenses[/new,/[id]],banking[/import],reports/{euer,vat},exports/datev}
 ```
 
-Idioms: feature `api.ts` = thin typed wrappers over `api()`; `hooks.ts` = `useQuery` keyed `[feature, 'list', q]` / `[feature, id]` + mutations invalidating `[feature]`, `['dashboard']`, `['reports']`. Forms: `useForm<z.input<S>, unknown, z.output<S>>({ resolver: zodResolver(S) })` + `FormTextField`. Money display-only via `eur()`. Files: `apiDownload(path, filename)`; uploads: hidden `<input type=file>` + `formData`.
+i18n (Epic 18, `docs/stories/EPIC-18-language-toggle.md`): `next-intl` without routing · locale from cookie `fa_locale` (`src/i18n/config.ts`, `src/i18n/request.ts`) · default `de` · messages `messages/{de,en}.json` (namespaces `common, nav, sandbox, auth, status, enums, profile, clients, invoices, expenses, receipts, dashboard, reports, audit, banking, datev`; `errors` DE-only = §18 codes) · `LanguageToggle` in AppNav · `useFormat()` for `eur/pct/date/dateTime` · `useZodResolver(S)` (locale error map) + `translateValidation` in `FormTextField` · `useStatusLabel()` · `useErrorMessage()` · `useCategoryName()` (nameDe/nameEn). Add a string = key in **both** JSON files + `useTranslations('<ns>')`.
+
+Idioms: feature `api.ts` = thin typed wrappers over `api()`; `hooks.ts` = `useQuery` keyed `[feature, 'list', q]` / `[feature, id]` + mutations invalidating `[feature]`, `['dashboard']`, `['reports']`. Forms: `useForm<z.input<S>, unknown, z.output<S>>({ resolver: useZodResolver(S) })` + `FormTextField`. Money display-only via `useFormat().eur`. Files: `apiDownload(path, filename)`; uploads: hidden `<input type=file>` + `formData`.
 
 ---
 
@@ -201,5 +203,5 @@ Idioms: feature `api.ts` = thin typed wrappers over `api()`; `hooks.ts` = `useQu
 3. Module: `internal/<x>.repository.ts` (extends `TenantScopedRepository`) → `domain/` pure fns → `<x>.service.ts` (mutations `(tx: TxCtx, cmd)`, reads `(ctx, q)`; audit + outbox in same tx) → `<x>.routes.ts` via `defineRoutes` → `<x>.module.ts` factory → `index.ts` barrel.
 4. Wire in `composition-root.ts` (import, `Services` field, instantiate in tier order, `services` object, `routed` array).
 5. Tests: unit for domain, integration file in `apps/api/test/`, include a cross-tenant 404 case.
-6. Web: `features/<x>/{api,hooks}.ts` → page under `app/(app)/…` → nav entry in `AppNav` if top-level.
+6. Web: `features/<x>/{api,hooks}.ts` → page under `app/(app)/…` (all strings via `useTranslations`, keys in `messages/de.json` **and** `en.json`) → nav entry in `AppNav` if top-level.
 7. Gate: `pnpm format; pnpm -r lint; pnpm -r typecheck; pnpm arch; pnpm -r test; pnpm --filter @fa/web build`.

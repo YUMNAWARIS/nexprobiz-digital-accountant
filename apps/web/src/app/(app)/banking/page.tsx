@@ -3,6 +3,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Button, Card, Chip, MenuItem, Select, Stack, TextField } from '@mui/material';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Suspense, useState } from 'react';
 import {
   BANK_CLASSIFICATION,
@@ -12,17 +13,10 @@ import {
 import { DataTable } from '@/components/ui/DataTable';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { StatusChip } from '@/components/ui/StatusChip';
+import { StatusChip, useStatusLabel } from '@/components/ui/StatusChip';
 import { ReconcileDialog } from '@/features/banking/components/ReconcileDialog';
 import { useBankTransactions, useClassifyBankTransaction } from '@/features/banking/hooks';
-import { date, eur } from '@/lib/format';
-
-const LABEL: Record<BankClassification, string> = {
-  UNREVIEWED: 'Ungeprüft',
-  BUSINESS: 'Geschäftlich',
-  PERSONAL: 'Privat',
-  TRANSFER: 'Umbuchung',
-};
+import { useFormat } from '@/lib/format';
 
 function BankingInner() {
   const initial = useSearchParams().get('classification') as BankClassification | null;
@@ -41,10 +35,14 @@ function BankingInner() {
     pageSize: 20,
   });
   const classify = useClassifyBankTransaction();
+  const t = useTranslations('banking');
+  const tc = useTranslations('common');
+  const { date, eur } = useFormat();
+  const LABEL = useStatusLabel();
   return (
     <>
       <PageHeader
-        title="Bank"
+        title={t('title')}
         actions={
           <Button
             component={Link}
@@ -52,7 +50,7 @@ function BankingInner() {
             variant="contained"
             startIcon={<UploadFileIcon />}
           >
-            CSV importieren
+            {t('importCsv')}
           </Button>
         }
       />
@@ -61,7 +59,7 @@ function BankingInner() {
         <TextField
           size="small"
           select
-          label="Klassifizierung"
+          label={t('classification')}
           value={classification}
           onChange={(e) => {
             setClassification(e.target.value as BankClassification | '');
@@ -69,17 +67,17 @@ function BankingInner() {
           }}
           sx={{ minWidth: 180 }}
         >
-          <MenuItem value="">Alle</MenuItem>
+          <MenuItem value="">{tc('all')}</MenuItem>
           {BANK_CLASSIFICATION.map((c) => (
             <MenuItem key={c} value={c}>
-              {LABEL[c]}
+              {LABEL(c)}
             </MenuItem>
           ))}
         </TextField>
         <TextField
           size="small"
           select
-          label="Abgleich"
+          label={t('reconciliation')}
           value={reconciled}
           onChange={(e) => {
             setReconciled(e.target.value as '' | 'true' | 'false');
@@ -87,14 +85,14 @@ function BankingInner() {
           }}
           sx={{ minWidth: 160 }}
         >
-          <MenuItem value="">Alle</MenuItem>
-          <MenuItem value="false">Offen</MenuItem>
-          <MenuItem value="true">Abgeglichen</MenuItem>
+          <MenuItem value="">{tc('all')}</MenuItem>
+          <MenuItem value="false">{t('openOnly')}</MenuItem>
+          <MenuItem value="true">{t('reconciledOnly')}</MenuItem>
         </TextField>
         <TextField
           size="small"
           type="date"
-          label="Von"
+          label={tc('from')}
           value={dateFrom}
           onChange={(e) => {
             setDateFrom(e.target.value);
@@ -105,7 +103,7 @@ function BankingInner() {
         <TextField
           size="small"
           type="date"
-          label="Bis"
+          label={tc('to')}
           value={dateTo}
           onChange={(e) => {
             setDateTo(e.target.value);
@@ -121,13 +119,13 @@ function BankingInner() {
           error={q.error}
           getRowId={(r) => r.id}
           columns={[
-            { key: 'date', header: 'Buchung', render: (r) => date(r.bookingDate) },
-            { key: 'desc', header: 'Verwendungszweck', render: (r) => r.description },
-            { key: 'cp', header: 'Gegenpartei', render: (r) => r.counterparty ?? '—' },
-            { key: 'amount', header: 'Betrag', align: 'right', render: (r) => eur(r.amount) },
+            { key: 'date', header: t('booking'), render: (r) => date(r.bookingDate) },
+            { key: 'desc', header: t('purpose'), render: (r) => r.description },
+            { key: 'cp', header: t('counterparty'), render: (r) => r.counterparty ?? '—' },
+            { key: 'amount', header: tc('amount'), align: 'right', render: (r) => eur(r.amount) },
             {
               key: 'class',
-              header: 'Klassifizierung',
+              header: t('classification'),
               render: (r) => (
                 <Select
                   size="small"
@@ -143,7 +141,7 @@ function BankingInner() {
                 >
                   {BANK_CLASSIFICATION.map((c) => (
                     <MenuItem key={c} value={c}>
-                      {LABEL[c]}
+                      {LABEL(c)}
                     </MenuItem>
                   ))}
                 </Select>
@@ -151,7 +149,7 @@ function BankingInner() {
             },
             {
               key: 'recon',
-              header: 'Abgleich',
+              header: t('reconciliation'),
               render: (r) =>
                 r.reconciliation ? (
                   <Chip
@@ -164,11 +162,15 @@ function BankingInner() {
                         ? `/expenses/${r.reconciliation.targetId}`
                         : '/invoices?status=PAID'
                     }
-                    label={r.reconciliation.targetType === 'EXPENSE' ? 'Ausgabe' : 'Zahlung'}
+                    label={
+                      r.reconciliation.targetType === 'EXPENSE'
+                        ? t('expenseChip')
+                        : t('paymentChip')
+                    }
                   />
                 ) : r.classification === 'BUSINESS' ? (
                   <Button size="small" onClick={() => setReconcileTx(r)}>
-                    Abgleichen
+                    {t('reconcile')}
                   </Button>
                 ) : (
                   <StatusChip status={r.classification} />

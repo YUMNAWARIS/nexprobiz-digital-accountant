@@ -1,5 +1,6 @@
 'use client';
 import { Card, CardContent } from '@mui/material';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { InvoiceForm } from '@/features/invoices/components/InvoiceForm';
@@ -8,12 +9,10 @@ import { useCreateInvoice } from '@/features/invoices/hooks';
 export default function NewInvoicePage() {
   const router = useRouter();
   const create = useCreateInvoice();
+  const t = useTranslations('invoices');
   return (
     <>
-      <PageHeader
-        title="Neue Rechnung"
-        subtitle="Wird als Entwurf gespeichert und kann bis zur Finalisierung bearbeitet werden."
-      />
+      <PageHeader title={t('new')} subtitle={t('newSubtitle')} />
       <Card>
         <CardContent>
           <InvoiceForm

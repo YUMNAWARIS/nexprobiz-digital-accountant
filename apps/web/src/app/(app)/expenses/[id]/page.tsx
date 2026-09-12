@@ -1,5 +1,4 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
 import CheckIcon from '@mui/icons-material/Check';
 import UndoIcon from '@mui/icons-material/Undo';
 import {
@@ -15,6 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -26,12 +26,14 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { ExpenseForm } from '@/features/expenses/components/ExpenseForm';
 import {
+  useCategoryName,
   useExpense,
   usePostExpense,
   useReverseExpense,
   useUpdateExpense,
 } from '@/features/expenses/hooks';
-import { date, eur } from '@/lib/format';
+import { useZodResolver } from '@/i18n/useZodResolver';
+import { useFormat } from '@/lib/format';
 
 export default function ExpenseDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -40,20 +42,24 @@ export default function ExpenseDetailPage() {
   const post = usePostExpense(id);
   const reverse = useReverseExpense(id);
   const [revOpen, setRevOpen] = useState(false);
+  const t = useTranslations('expenses');
+  const tc = useTranslations('common');
+  const te = useTranslations('enums');
+  const { date, eur } = useFormat();
+  const categoryName = useCategoryName();
   const revForm = useForm<
     z.input<typeof ReverseExpenseRequest>,
     unknown,
     z.output<typeof ReverseExpenseRequest>
-  >({ resolver: zodResolver(ReverseExpenseRequest), defaultValues: { reason: '' } });
+  >({ resolver: useZodResolver(ReverseExpenseRequest), defaultValues: { reason: '' } });
   if (q.isLoading) return null;
-  if (q.error || !q.data)
-    return <ErrorAlert error={q.error ?? new Error('Ausgabe nicht gefunden')} />;
+  if (q.error || !q.data) return <ErrorAlert error={q.error ?? new Error(t('notFound'))} />;
   const e = q.data;
   return (
     <>
       <PageHeader
         title={`${e.merchant} · ${eur(e.grossAmount)}`}
-        subtitle={`${e.categoryName} · ${date(e.expenseDate)}`}
+        subtitle={`${categoryName(e.categoryId, e.categoryName)} · ${date(e.expenseDate)}`}
         actions={
           <>
             <StatusChip status={e.status} />
@@ -63,25 +69,20 @@ export default function ExpenseDetailPage() {
                 startIcon={<CheckIcon />}
                 disabled={post.isPending}
                 onClick={() => {
-                  if (
-                    confirm(
-                      'Ausgabe buchen? Danach ist sie unveränderlich (Korrektur nur per Storno).',
-                    )
-                  )
-                    post.mutate();
+                  if (confirm(t('postConfirm'))) post.mutate();
                 }}
               >
-                Buchen
+                {t('post')}
               </Button>
             )}
             {e.status === 'POSTED' && (
               <Button color="error" startIcon={<UndoIcon />} onClick={() => setRevOpen(true)}>
-                Stornieren
+                {t('reverse')}
               </Button>
             )}
             {e.receiptId && (
               <Button component={Link} href={`/receipts/${e.receiptId}`}>
-                Beleg
+                {t('receipt')}
               </Button>
             )}
           </>
@@ -104,21 +105,21 @@ export default function ExpenseDetailPage() {
           <CardContent>
             <Stack spacing={1}>
               {e.status === 'REVERSED' && (
-                <Alert severity="warning">
-                  Storniert am {date(e.reversedAt)} — die ursprüngliche Buchung bleibt erhalten,
-                  eine Gegenbuchung neutralisiert sie.
-                </Alert>
+                <Alert severity="warning">{t('reversedHint', { date: date(e.reversedAt) })}</Alert>
               )}
               <Typography>
-                Netto {eur(e.netAmount)} · USt {eur(e.taxAmount)} · Brutto{' '}
+                {t('amountsLine', { net: eur(e.netAmount), tax: eur(e.taxAmount) })}{' '}
                 <strong>{eur(e.grossAmount)}</strong>
               </Typography>
               <Typography>
-                Steuer: {e.taxTreatment} · Geschäftlicher Anteil: {e.businessPercentage} %
+                {t('taxShareLine', { treatment: te(e.taxTreatment), pct: e.businessPercentage })}
               </Typography>
               {e.description && <Typography color="text.secondary">{e.description}</Typography>}
               <Typography variant="caption" color="text.secondary">
-                Gebucht am {date(e.postedAt)} · Journal {e.journalEntryId?.slice(0, 8)}
+                {t('postedLine', {
+                  date: date(e.postedAt),
+                  journal: e.journalEntryId?.slice(0, 8) ?? '—',
+                })}
               </Typography>
             </Stack>
           </CardContent>
@@ -130,13 +131,13 @@ export default function ExpenseDetailPage() {
             reverse.mutate(v, { onSuccess: () => setRevOpen(false) }),
           )}
         >
-          <DialogTitle>Ausgabe stornieren</DialogTitle>
+          <DialogTitle>{t('reverseTitle')}</DialogTitle>
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 1 }}>
               <FormTextField
                 control={revForm.control}
                 name="reason"
-                label="Grund"
+                label={t('reason')}
                 multiline
                 minRows={2}
                 autoFocus
@@ -144,9 +145,9 @@ export default function ExpenseDetailPage() {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setRevOpen(false)}>Abbrechen</Button>
+            <Button onClick={() => setRevOpen(false)}>{tc('cancel')}</Button>
             <Button type="submit" color="error" variant="contained" disabled={reverse.isPending}>
-              Stornieren
+              {t('reverse')}
             </Button>
           </DialogActions>
         </form>

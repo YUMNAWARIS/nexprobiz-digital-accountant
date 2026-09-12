@@ -31,28 +31,30 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useLogout } from '@/features/auth/hooks';
 import { FEEDBACK_URL } from '@/lib/env';
 import { useThemeMode } from '@/providers/ThemeProvider';
+import { LanguageToggle } from './LanguageToggle';
 import { SandboxBanner } from './SandboxBanner';
 
 export const DRAWER_WIDTH = 240;
 
 /** §50 routes. No entries for out-of-scope features (§3). */
-const NAV: Array<{ href: string; label: string; icon: React.ReactNode }> = [
-  { href: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-  { href: '/clients', label: 'Kunden', icon: <PeopleIcon /> },
-  { href: '/invoices', label: 'Rechnungen', icon: <ReceiptIcon /> },
-  { href: '/expenses', label: 'Ausgaben', icon: <ShoppingCartIcon /> },
-  { href: '/receipts', label: 'Belege', icon: <ReceiptLongIcon /> },
-  { href: '/banking', label: 'Bank', icon: <AccountBalanceIcon /> },
-  { href: '/reports/euer', label: 'EÜR', icon: <AssessmentIcon /> },
-  { href: '/reports/vat', label: 'Umsatzsteuer', icon: <AssessmentIcon /> },
-  { href: '/exports/datev', label: 'DATEV-Export', icon: <UploadFileIcon /> },
-  { href: '/audit', label: 'Protokoll', icon: <HistoryIcon /> },
-  { href: '/settings/business', label: 'Unternehmen', icon: <SettingsIcon /> },
-];
+const NAV = [
+  { href: '/dashboard', key: 'dashboard', icon: <DashboardIcon /> },
+  { href: '/clients', key: 'clients', icon: <PeopleIcon /> },
+  { href: '/invoices', key: 'invoices', icon: <ReceiptIcon /> },
+  { href: '/expenses', key: 'expenses', icon: <ShoppingCartIcon /> },
+  { href: '/receipts', key: 'receipts', icon: <ReceiptLongIcon /> },
+  { href: '/banking', key: 'banking', icon: <AccountBalanceIcon /> },
+  { href: '/reports/euer', key: 'euer', icon: <AssessmentIcon /> },
+  { href: '/reports/vat', key: 'vat', icon: <AssessmentIcon /> },
+  { href: '/exports/datev', key: 'datev', icon: <UploadFileIcon /> },
+  { href: '/audit', key: 'audit', icon: <HistoryIcon /> },
+  { href: '/settings/business', key: 'settings', icon: <SettingsIcon /> },
+] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const theme = useTheme();
@@ -62,12 +64,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { mode, toggle } = useThemeMode();
   const logout = useLogout();
+  const t = useTranslations('nav');
 
   const drawer = (
     <Box role="navigation" sx={{ width: DRAWER_WIDTH }}>
       <Toolbar>
         <Typography variant="h6" fontWeight={700}>
-          Buchhaltung
+          {t('brand')}
         </Typography>
       </Toolbar>
       <Divider />
@@ -81,7 +84,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             onClick={() => setOpen(false)}
           >
             <ListItemIcon>{n.icon}</ListItemIcon>
-            <ListItemText primary={n.label} />
+            <ListItemText primary={t(n.key)} />
           </ListItemButton>
         ))}
       </List>
@@ -91,7 +94,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <ListItemIcon>
             <FeedbackIcon />
           </ListItemIcon>
-          <ListItemText primary="Feedback senden" />
+          <ListItemText primary={t('feedback')} />
         </ListItemButton>
         <ListItemButton
           onClick={() => logout.mutate(undefined, { onSuccess: () => router.replace('/login') })}
@@ -99,7 +102,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <ListItemIcon>
             <LogoutIcon />
           </ListItemIcon>
-          <ListItemText primary="Abmelden" />
+          <ListItemText primary={t('logout')} />
         </ListItemButton>
       </List>
     </Box>
@@ -116,14 +119,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <SandboxBanner />
         <Toolbar>
           {!isDesktop && (
-            <IconButton edge="start" onClick={() => setOpen(true)} aria-label="Menü">
+            <IconButton edge="start" onClick={() => setOpen(true)} aria-label={t('menu')}>
               <MenuIcon />
             </IconButton>
           )}
           <Typography variant="subtitle1" sx={{ flexGrow: 1 }}>
-            Freelancer Accounting — Sandbox
+            {t('title')}
           </Typography>
-          <IconButton onClick={toggle} aria-label="Theme wechseln">
+          <LanguageToggle />
+          <IconButton onClick={toggle} aria-label={t('toggleTheme')}>
             {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
           </IconButton>
         </Toolbar>

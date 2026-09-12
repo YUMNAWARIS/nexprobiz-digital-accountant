@@ -1,5 +1,6 @@
 'use client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLocale } from 'next-intl';
 import type { ListExpensesQuery, ReverseExpenseRequest, UpdateExpenseRequest } from '@fa/contracts';
 import { expensesApi } from './api';
 
@@ -13,6 +14,15 @@ export const useExpenseCategories = () =>
     queryFn: expensesApi.categories,
     staleTime: 3_600_000,
   });
+/** Category display name in the UI language (API returns nameDe + nameEn). */
+export function useCategoryName() {
+  const locale = useLocale();
+  const cats = useExpenseCategories();
+  return (idOrCode: string, fallback: string) => {
+    const c = cats.data?.data.find((x) => x.id === idOrCode || x.code === idOrCode);
+    return c ? (locale === 'en' ? c.nameEn : c.nameDe) : fallback;
+  };
+}
 function useInvalidate() {
   const qc = useQueryClient();
   return () =>

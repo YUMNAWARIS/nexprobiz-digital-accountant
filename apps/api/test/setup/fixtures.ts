@@ -1,4 +1,5 @@
 /** Shared fixtures for integration tests. All calls go through HTTP so tenant isolation is exercised end-to-end. */
+import { randomUUID } from 'node:crypto';
 import type { Harness } from './harness';
 
 export const PROFILE_REGULAR = {
@@ -38,7 +39,10 @@ export const CLIENT = {
 };
 
 let n = 0;
-export async function registerUser(h: Harness, email = `user${++n}-${Date.now()}@example.com`) {
+export async function registerUser(
+  h: Harness,
+  email = `user${++n}-${randomUUID().slice(0, 8)}@example.com`,
+) {
   const r = await h.http
     .post('/api/v1/auth/register')
     .send({ email, password: 'StrongPassword123!' });

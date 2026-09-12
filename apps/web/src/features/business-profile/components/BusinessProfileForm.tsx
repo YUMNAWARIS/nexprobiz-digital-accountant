@@ -1,6 +1,6 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Divider, Grid, MenuItem, Stack, Typography } from '@mui/material';
+import { useTranslations } from 'next-intl';
 import { useForm, Controller } from 'react-hook-form';
 import type { z } from 'zod';
 import { BusinessProfileInput, type BusinessProfileView } from '@fa/contracts';
@@ -9,6 +9,7 @@ type FormIn = z.input<typeof BusinessProfileInput>;
 type FormOut = z.output<typeof BusinessProfileInput>;
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { FormTextField } from '@/components/ui/FormTextField';
+import { useZodResolver } from '@/i18n/useZodResolver';
 import { useSaveBusinessProfile } from '../hooks';
 import { TextField } from '@mui/material';
 
@@ -39,15 +40,18 @@ function toInput(v: BusinessProfileView): FormIn {
 export function BusinessProfileForm({
   current,
   onSaved,
-  submitLabel = 'Speichern',
+  submitLabel,
 }: {
   current: BusinessProfileView | null;
   onSaved?: (v: BusinessProfileView) => void;
   submitLabel?: string;
 }) {
   const save = useSaveBusinessProfile();
+  const t = useTranslations('profile');
+  const te = useTranslations('enums');
+  const tc = useTranslations('common');
   const form = useForm<FormIn, unknown, FormOut>({
-    resolver: zodResolver(BusinessProfileInput),
+    resolver: useZodResolver(BusinessProfileInput),
     defaultValues: current ? toInput(current) : EMPTY,
   });
   const vatRegime = form.watch('vatRegime');
@@ -97,67 +101,62 @@ export function BusinessProfileForm({
       <Stack spacing={3}>
         <ErrorAlert error={save.error} />
         <Typography variant="subtitle1" fontWeight={600}>
-          Unternehmen
+          {t('sectionBusiness')}
         </Typography>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="legalName" label="Name (rechtlich)" />
+            <FormTextField control={c} name="legalName" label={t('legalName')} />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField
-              control={c}
-              name="businessName"
-              label="Geschäftsbezeichnung (optional)"
-              nullable
-            />
+            <FormTextField control={c} name="businessName" label={t('businessName')} nullable />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <Select
               name="businessType"
-              label="Art der Tätigkeit"
+              label={t('businessType')}
               options={[
-                ['FREIBERUFLER', 'Freiberufler'],
-                ['GEWERBETREIBENDER', 'Gewerbetreibender'],
+                ['FREIBERUFLER', te('FREIBERUFLER')],
+                ['GEWERBETREIBENDER', te('GEWERBETREIBENDER')],
               ]}
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="email" label="E-Mail (auf Rechnung)" nullable />
+            <FormTextField control={c} name="email" label={t('emailOnInvoice')} nullable />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="phone" label="Telefon" nullable />
+            <FormTextField control={c} name="phone" label={t('phone')} nullable />
           </Grid>
         </Grid>
         <Divider />
         <Typography variant="subtitle1" fontWeight={600}>
-          Adresse
+          {t('sectionAddress')}
         </Typography>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12 }}>
-            <FormTextField control={c} name="address.street" label="Straße und Hausnummer" />
+            <FormTextField control={c} name="address.street" label={t('street')} />
           </Grid>
           <Grid size={{ xs: 4 }}>
-            <FormTextField control={c} name="address.postalCode" label="PLZ" />
+            <FormTextField control={c} name="address.postalCode" label={t('postalCode')} />
           </Grid>
           <Grid size={{ xs: 5 }}>
-            <FormTextField control={c} name="address.city" label="Ort" />
+            <FormTextField control={c} name="address.city" label={t('city')} />
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <FormTextField control={c} name="address.country" label="Land" />
+            <FormTextField control={c} name="address.country" label={t('country')} />
           </Grid>
         </Grid>
         <Divider />
         <Typography variant="subtitle1" fontWeight={600}>
-          Steuern
+          {t('sectionTax')}
         </Typography>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Select
               name="vatRegime"
-              label="Umsatzsteuer"
+              label={t('vatRegime')}
               options={[
-                ['REGULAR', 'Regelbesteuerung'],
-                ['KLEINUNTERNEHMER', 'Kleinunternehmer (§19 UStG)'],
+                ['REGULAR', te('REGULAR')],
+                ['KLEINUNTERNEHMER', te('KLEINUNTERNEHMER')],
               ]}
             />
           </Grid>
@@ -165,10 +164,10 @@ export function BusinessProfileForm({
             <Grid size={{ xs: 12, md: 6 }}>
               <Select
                 name="vatTaxationMethod"
-                label="Versteuerung"
+                label={t('vatTaxationMethod')}
                 options={[
-                  ['IST', 'Ist-Versteuerung'],
-                  ['SOLL', 'Soll-Versteuerung'],
+                  ['IST', te('IST')],
+                  ['SOLL', te('SOLL')],
                 ]}
               />
             </Grid>
@@ -176,7 +175,7 @@ export function BusinessProfileForm({
           <Grid size={{ xs: 12, md: 6 }}>
             <Select
               name="chartOfAccounts"
-              label="Kontenrahmen"
+              label={t('chartOfAccounts')}
               options={[
                 ['SKR03', 'SKR03'],
                 ['SKR04', 'SKR04'],
@@ -184,19 +183,19 @@ export function BusinessProfileForm({
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="taxNumber" label="Steuernummer" nullable />
+            <FormTextField control={c} name="taxNumber" label={t('taxNumber')} nullable />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="vatId" label="USt-IdNr. (falls vorhanden)" nullable />
+            <FormTextField control={c} name="vatId" label={t('vatId')} nullable />
           </Grid>
         </Grid>
         <Divider />
         <Typography variant="subtitle1" fontWeight={600}>
-          Rechnungen & Bank
+          {t('sectionInvoicesBank')}
         </Typography>
         <Grid container spacing={2}>
           <Grid size={{ xs: 6, md: 3 }}>
-            <FormTextField control={c} name="invoicePrefix" label="Rechnungsnummer-Präfix" />
+            <FormTextField control={c} name="invoicePrefix" label={t('invoicePrefix')} />
           </Grid>
           <Grid size={{ xs: 6, md: 3 }}>
             <Controller
@@ -205,7 +204,7 @@ export function BusinessProfileForm({
               render={({ field, fieldState }) => (
                 <TextField
                   type="number"
-                  label="Zahlungsziel (Tage)"
+                  label={t('paymentTermDays')}
                   fullWidth
                   {...field}
                   onChange={(e) => field.onChange(Number(e.target.value))}
@@ -216,13 +215,13 @@ export function BusinessProfileForm({
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="bankName" label="Bank" nullable />
+            <FormTextField control={c} name="bankName" label={t('bankName')} nullable />
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
-            <FormTextField control={c} name="iban" label="IBAN" nullable />
+            <FormTextField control={c} name="iban" label={t('iban')} nullable />
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
-            <FormTextField control={c} name="bic" label="BIC" nullable />
+            <FormTextField control={c} name="bic" label={t('bic')} nullable />
           </Grid>
         </Grid>
         <Button
@@ -232,7 +231,7 @@ export function BusinessProfileForm({
           disabled={save.isPending}
           sx={{ alignSelf: 'flex-start' }}
         >
-          {submitLabel}
+          {submitLabel ?? tc('save')}
         </Button>
       </Stack>
     </form>

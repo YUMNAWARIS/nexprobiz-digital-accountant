@@ -9,32 +9,34 @@ import {
   Typography,
 } from '@mui/material';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { ReceiptReviewForm } from '@/features/receipts/components/ReceiptReviewForm';
 import { useReceipt } from '@/features/receipts/hooks';
-import { date, eur } from '@/lib/format';
+import { useFormat } from '@/lib/format';
 
 export default function ReceiptDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const q = useReceipt(id);
+  const t = useTranslations('receipts');
+  const { date, eur } = useFormat();
   if (q.isLoading) return null;
-  if (q.error || !q.data)
-    return <ErrorAlert error={q.error ?? new Error('Beleg nicht gefunden')} />;
+  if (q.error || !q.data) return <ErrorAlert error={q.error ?? new Error(t('notFound'))} />;
   const r = q.data;
   const processing = r.status === 'UPLOADED' || r.status === 'OCR_PROCESSING';
   return (
     <>
-      <PageHeader title={r.merchant ?? 'Beleg'} actions={<StatusChip status={r.status} />} />
+      <PageHeader title={r.merchant ?? t('receipt')} actions={<StatusChip status={r.status} />} />
       {processing && (
         <Card>
           <CardContent>
             <Stack direction="row" spacing={2} alignItems="center">
               <CircularProgress size={22} />
-              <Typography>Beleg wird gelesen …</Typography>
+              <Typography>{t('reading')}</Typography>
             </Stack>
           </CardContent>
         </Card>
@@ -54,11 +56,11 @@ export default function ReceiptDetailPage() {
           <CardContent>
             <Stack spacing={1}>
               <Typography>
-                Händler: <strong>{r.merchant}</strong>
+                {t('merchantLine')} <strong>{r.merchant}</strong>
               </Typography>
-              <Typography>Datum: {date(r.receiptDate)}</Typography>
+              <Typography>{t('dateLine', { date: date(r.receiptDate) })}</Typography>
               <Typography>
-                Netto {eur(r.netAmount)} · USt {eur(r.taxAmount)} · Brutto{' '}
+                {t('amountsLine', { net: eur(r.netAmount), tax: eur(r.taxAmount) })}{' '}
                 <strong>{eur(r.grossAmount)}</strong>
               </Typography>
               {r.expenseId ? (
@@ -66,11 +68,11 @@ export default function ReceiptDetailPage() {
                   severity="success"
                   action={
                     <Button component={Link} href={`/expenses/${r.expenseId}`}>
-                      Ausgabe öffnen
+                      {t('openExpense')}
                     </Button>
                   }
                 >
-                  Beleg ist einer Ausgabe zugeordnet.
+                  {t('linkedToExpense')}
                 </Alert>
               ) : (
                 <Alert
@@ -82,11 +84,11 @@ export default function ReceiptDetailPage() {
                       variant="contained"
                       size="small"
                     >
-                      Ausgabe anlegen
+                      {t('createExpense')}
                     </Button>
                   }
                 >
-                  Bestätigt — jetzt eine Ausgabe daraus erstellen.
+                  {t('confirmedCreateHint')}
                 </Alert>
               )}
             </Stack>

@@ -1,6 +1,7 @@
 'use client';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import { Alert, Button, Card, CardContent } from '@mui/material';
+import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -14,9 +15,9 @@ export default function ClientDetailPage() {
   const q = useClient(id);
   const update = useUpdateClient(id);
   const archive = useArchiveClient();
+  const t = useTranslations('clients');
   if (q.isLoading) return null;
-  if (q.error || !q.data)
-    return <ErrorAlert error={q.error ?? new Error('Kunde nicht gefunden')} />;
+  if (q.error || !q.data) return <ErrorAlert error={q.error ?? new Error(t('notFound'))} />;
   const c = q.data;
   return (
     <>
@@ -31,15 +32,11 @@ export default function ClientDetailPage() {
                 startIcon={<ArchiveIcon />}
                 disabled={archive.isPending}
                 onClick={() => {
-                  if (
-                    confirm(
-                      'Kunde archivieren? Er kann dann nicht mehr für neue Rechnungen gewählt werden.',
-                    )
-                  )
+                  if (confirm(t('archiveConfirm')))
                     archive.mutate(id, { onSuccess: () => router.push('/clients') });
                 }}
               >
-                Archivieren
+                {t('archive')}
               </Button>
             )}
           </>
@@ -47,7 +44,7 @@ export default function ClientDetailPage() {
       />
       {c.status === 'ARCHIVED' && (
         <Alert severity="info" sx={{ mb: 2 }}>
-          Archivierter Kunde — nur lesend.
+          {t('archivedReadOnly')}
         </Alert>
       )}
       <Card>

@@ -25,9 +25,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import {
   CancelInvoiceRequest,
@@ -38,7 +38,8 @@ import {
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { FormTextField } from '@/components/ui/FormTextField';
 import { StatusChip } from '@/components/ui/StatusChip';
-import { date, eur, pct } from '@/lib/format';
+import { useZodResolver } from '@/i18n/useZodResolver';
+import { useFormat } from '@/lib/format';
 import {
   useCancelInvoice,
   useFinalizeInvoice,
@@ -59,17 +60,21 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
   const update = useUpdateInvoice(inv.id);
   const pay = useRecordPayment(inv.id);
   const payments = useInvoicePayments(inv.id);
+  const t = useTranslations('invoices');
+  const tc = useTranslations('common');
+  const te = useTranslations('enums');
+  const { date, eur, pct } = useFormat();
   const cancelForm = useForm<
     z.input<typeof CancelInvoiceRequest>,
     unknown,
     z.output<typeof CancelInvoiceRequest>
-  >({ resolver: zodResolver(CancelInvoiceRequest), defaultValues: { reason: '' } });
+  >({ resolver: useZodResolver(CancelInvoiceRequest), defaultValues: { reason: '' } });
   const payForm = useForm<
     z.input<typeof RecordPaymentRequest>,
     unknown,
     z.output<typeof RecordPaymentRequest>
   >({
-    resolver: zodResolver(RecordPaymentRequest),
+    resolver: useZodResolver(RecordPaymentRequest),
     defaultValues: {
       amount: inv.outstandingAmount,
       paymentDate: new Date().toISOString().slice(0, 10),
@@ -93,7 +98,7 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
             error={update.error}
           />
           <Button onClick={() => setEditing(false)} sx={{ mt: 1 }}>
-            Abbrechen
+            {tc('cancel')}
           </Button>
         </CardContent>
       </Card>
@@ -107,7 +112,7 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
         <StatusChip status={inv.status} />
         {isDraft && (
           <Button startIcon={<EditIcon />} onClick={() => setEditing(true)}>
-            Bearbeiten
+            {t('edit')}
           </Button>
         )}
         {isDraft && (
@@ -116,15 +121,10 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
             startIcon={<CheckIcon />}
             disabled={finalize.isPending}
             onClick={() => {
-              if (
-                confirm(
-                  'Rechnung finalisieren? Danach ist sie unveränderlich und erhält eine fortlaufende Nummer.',
-                )
-              )
-                finalize.mutate();
+              if (confirm(t('finalizeConfirm'))) finalize.mutate();
             }}
           >
-            Finalisieren
+            {t('finalize')}
           </Button>
         )}
         {!isDraft && (
@@ -147,30 +147,23 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
         )}
         {canPay && (
           <Button variant="outlined" startIcon={<PaymentsIcon />} onClick={() => setPayOpen(true)}>
-            Zahlung erfassen
+            {t('recordPayment')}
           </Button>
         )}
         {canCancel && (
           <Button color="error" startIcon={<CancelIcon />} onClick={() => setCancelOpen(true)}>
-            Stornieren
+            {t('cancel')}
           </Button>
         )}
       </Stack>
-      {!isDraft && !docsReady && (
-        <Alert severity="info">
-          Dokumente (PDF / XRechnung) werden erzeugt … Seite in Kürze neu laden.
-        </Alert>
-      )}
+      {!isDraft && !docsReady && <Alert severity="info">{t('docsPending')}</Alert>}
 
       <Card>
         <CardContent>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Typography variant="overline">Empfänger</Typography>
-              <Typography>
-                {inv.clientSnapshot.name ??
-                  '(Entwurf — Kundendaten werden bei Finalisierung eingefroren)'}
-              </Typography>
+              <Typography variant="overline">{t('recipient')}</Typography>
+              <Typography>{inv.clientSnapshot.name ?? t('draftSnapshotHint')}</Typography>
               {inv.clientSnapshot.street && (
                 <Typography variant="body2">
                   {inv.clientSnapshot.street}
@@ -179,20 +172,28 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
                 </Typography>
               )}
               {inv.clientSnapshot.vatId && (
-                <Typography variant="body2">USt-IdNr. {inv.clientSnapshot.vatId}</Typography>
+                <Typography variant="body2">
+                  {t('vatIdLine', { vatId: inv.clientSnapshot.vatId })}
+                </Typography>
               )}
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <Typography variant="overline">Daten</Typography>
-              <Typography variant="body2">Rechnungsdatum: {date(inv.issueDate)}</Typography>
-              <Typography variant="body2">Leistungsdatum: {date(inv.serviceDate)}</Typography>
-              <Typography variant="body2">Fällig: {date(inv.dueDate)}</Typography>
+              <Typography variant="overline">{t('dates')}</Typography>
+              <Typography variant="body2">
+                {t('issueDateLine', { date: date(inv.issueDate) })}
+              </Typography>
+              <Typography variant="body2">
+                {t('serviceDateLine', { date: date(inv.serviceDate) })}
+              </Typography>
+              <Typography variant="body2">{t('dueLine', { date: date(inv.dueDate) })}</Typography>
               {inv.finalizedAt && (
-                <Typography variant="body2">Finalisiert: {date(inv.finalizedAt)}</Typography>
+                <Typography variant="body2">
+                  {t('finalizedLine', { date: date(inv.finalizedAt) })}
+                </Typography>
               )}
               {inv.cancelledAt && (
                 <Typography variant="body2" color="error">
-                  Storniert: {date(inv.cancelledAt)}
+                  {t('cancelledLine', { date: date(inv.cancelledAt) })}
                 </Typography>
               )}
             </Grid>
@@ -201,12 +202,12 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Pos.</TableCell>
-                <TableCell>Beschreibung</TableCell>
-                <TableCell align="right">Menge</TableCell>
-                <TableCell align="right">Einzelpreis</TableCell>
-                <TableCell align="right">USt</TableCell>
-                <TableCell align="right">Netto</TableCell>
+                <TableCell>{t('pos')}</TableCell>
+                <TableCell>{tc('description')}</TableCell>
+                <TableCell align="right">{t('quantity')}</TableCell>
+                <TableCell align="right">{t('unitPriceShort')}</TableCell>
+                <TableCell align="right">{tc('vat')}</TableCell>
+                <TableCell align="right">{tc('net')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -228,17 +229,17 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
           </Table>
           <Stack alignItems="flex-end" sx={{ mt: 2 }} spacing={0.5}>
             <Typography>
-              Netto: <strong>{eur(inv.subtotalNet)}</strong>
+              {t('netLine')} <strong>{eur(inv.subtotalNet)}</strong>
             </Typography>
             <Typography>
-              USt: <strong>{eur(inv.taxTotal)}</strong>
+              {t('vatLine')} <strong>{eur(inv.taxTotal)}</strong>
             </Typography>
-            <Typography variant="h6">Brutto: {eur(inv.grossTotal)}</Typography>
+            <Typography variant="h6">{t('grossLine', { amount: eur(inv.grossTotal) })}</Typography>
             {!isDraft && (
               <Typography
                 color={inv.outstandingAmount === '0.00' ? 'success.main' : 'warning.main'}
               >
-                Bezahlt {eur(inv.paidAmount)} · Offen {eur(inv.outstandingAmount)}
+                {t('paidOpen', { paid: eur(inv.paidAmount), open: eur(inv.outstandingAmount) })}
               </Typography>
             )}
           </Stack>
@@ -254,17 +255,17 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
         <Card>
           <CardContent>
             <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-              Zahlungen
+              {t('payments')}
             </Typography>
             {(payments.data?.data ?? []).length === 0 ? (
-              <Typography color="text.secondary">Noch keine Zahlung erfasst.</Typography>
+              <Typography color="text.secondary">{t('noPayments')}</Typography>
             ) : (
               <Table size="small">
                 <TableBody>
                   {payments.data!.data.map((p) => (
                     <TableRow key={p.id}>
                       <TableCell>{date(p.paymentDate)}</TableCell>
-                      <TableCell>{p.paymentMethod}</TableCell>
+                      <TableCell>{te(p.paymentMethod)}</TableCell>
                       <TableCell>{p.reference ?? '—'}</TableCell>
                       <TableCell align="right">{eur(p.amount)}</TableCell>
                     </TableRow>
@@ -282,16 +283,14 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
             cancel.mutate(v, { onSuccess: () => setCancelOpen(false) }),
           )}
         >
-          <DialogTitle>Rechnung stornieren</DialogTitle>
+          <DialogTitle>{t('cancelTitle')}</DialogTitle>
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 1 }}>
-              <Alert severity="warning">
-                Die Rechnung bleibt erhalten; es wird eine Stornobuchung erzeugt.
-              </Alert>
+              <Alert severity="warning">{t('cancelHint')}</Alert>
               <FormTextField
                 control={cancelForm.control}
                 name="reason"
-                label="Grund"
+                label={t('reason')}
                 multiline
                 minRows={2}
                 autoFocus
@@ -299,9 +298,9 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setCancelOpen(false)}>Abbrechen</Button>
+            <Button onClick={() => setCancelOpen(false)}>{tc('cancel')}</Button>
             <Button type="submit" color="error" variant="contained" disabled={cancel.isPending}>
-              Stornieren
+              {t('cancel')}
             </Button>
           </DialogActions>
         </form>
@@ -313,19 +312,19 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
             pay.mutate(v, { onSuccess: () => setPayOpen(false) }),
           )}
         >
-          <DialogTitle>Zahlung erfassen</DialogTitle>
+          <DialogTitle>{t('recordPayment')}</DialogTitle>
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 1 }}>
               <FormTextField
                 control={payForm.control}
                 name="amount"
-                label={`Betrag (offen: ${eur(inv.outstandingAmount)})`}
+                label={t('amountOpen', { open: eur(inv.outstandingAmount) })}
                 autoFocus
               />
               <FormTextField
                 control={payForm.control}
                 name="paymentDate"
-                label="Zahlungsdatum"
+                label={t('paymentDate')}
                 type="date"
                 slotProps={{ inputLabel: { shrink: true } }}
               />
@@ -333,22 +332,27 @@ export function InvoiceDetail({ invoice: inv }: { invoice: InvoiceView }) {
                 control={payForm.control}
                 name="paymentMethod"
                 render={({ field }) => (
-                  <TextField select label="Zahlungsart" {...field}>
+                  <TextField select label={t('paymentMethod')} {...field}>
                     {PAYMENT_METHOD.map((m) => (
                       <MenuItem key={m} value={m}>
-                        {m}
+                        {te(m)}
                       </MenuItem>
                     ))}
                   </TextField>
                 )}
               />
-              <FormTextField control={payForm.control} name="reference" label="Referenz" nullable />
+              <FormTextField
+                control={payForm.control}
+                name="reference"
+                label={t('reference')}
+                nullable
+              />
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setPayOpen(false)}>Abbrechen</Button>
+            <Button onClick={() => setPayOpen(false)}>{tc('cancel')}</Button>
             <Button type="submit" variant="contained" disabled={pay.isPending}>
-              Erfassen
+              {t('record')}
             </Button>
           </DialogActions>
         </form>

@@ -2,6 +2,7 @@
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { Button, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
 import { RECEIPT_MIME_TYPES } from '@fa/contracts';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
@@ -12,6 +13,7 @@ export function ReceiptUpload() {
   const input = useRef<HTMLInputElement>(null);
   const upload = useUploadReceipt();
   const router = useRouter();
+  const t = useTranslations('receipts');
   return (
     <>
       <ErrorAlert error={upload.error} />
@@ -32,10 +34,10 @@ export function ReceiptUpload() {
         onClick={() => input.current?.click()}
         disabled={upload.isPending}
       >
-        Beleg hochladen
+        {t('upload')}
       </Button>
       <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-        JPEG, PNG oder PDF · max. 10 MB
+        {t('uploadHint')}
       </Typography>
     </>
   );

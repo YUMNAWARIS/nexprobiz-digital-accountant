@@ -1,5 +1,4 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
@@ -12,9 +11,15 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useTranslations } from 'next-intl';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import type { z } from 'zod';
-import { CreateInvoiceRequest, type InvoiceView, type TaxTreatment } from '@fa/contracts';
+import {
+  CreateInvoiceRequest,
+  TAX_TREATMENT,
+  type InvoiceView,
+  type TaxTreatment,
+} from '@fa/contracts';
 
 type FormIn = z.input<typeof CreateInvoiceRequest>;
 type FormOut = z.output<typeof CreateInvoiceRequest>;
@@ -22,20 +27,16 @@ import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { FormTextField } from '@/components/ui/FormTextField';
 import { useBusinessProfile } from '@/features/business-profile/hooks';
 import { useClients } from '@/features/clients/hooks';
+import { useZodResolver } from '@/i18n/useZodResolver';
 
-const TREATMENTS: Array<[TaxTreatment, string]> = [
-  ['STANDARD_19', '19 % USt'],
-  ['REDUCED_7', '7 % USt'],
-  ['KLEINUNTERNEHMER_19', 'Steuerfrei (§19 UStG)'],
-];
 const today = () => new Date().toISOString().slice(0, 10);
-const EMPTY_LINE = {
+const emptyLine = (unit: string) => ({
   description: '',
   quantity: '1',
-  unit: 'Stunde',
+  unit,
   unitPrice: '',
   taxTreatment: 'STANDARD_19' as TaxTreatment,
-};
+});
 
 /** Totals are NOT computed here (ARCH-004). The API returns them; the page displays them. */
 export function InvoiceForm({
@@ -52,8 +53,12 @@ export function InvoiceForm({
   const clients = useClients({ status: 'ACTIVE', pageSize: 100 });
   const profile = useBusinessProfile();
   const klein = profile.data?.vatRegime === 'KLEINUNTERNEHMER';
+  const t = useTranslations('invoices');
+  const tc = useTranslations('common');
+  const te = useTranslations('enums');
+  const EMPTY_LINE = emptyLine(t('unitDefault'));
   const form = useForm<FormIn, unknown, FormOut>({
-    resolver: zodResolver(CreateInvoiceRequest),
+    resolver: useZodResolver(CreateInvoiceRequest),
     defaultValues: current
       ? {
           clientId: current.clientId,
@@ -83,11 +88,7 @@ export function InvoiceForm({
     <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
       <Stack spacing={3}>
         <ErrorAlert error={error} />
-        {klein && (
-          <Alert severity="info">
-            Kleinunternehmer (§19 UStG): Positionen werden ohne Umsatzsteuer berechnet.
-          </Alert>
-        )}
+        {klein && <Alert severity="info">{t('kleinHint')}</Alert>}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
@@ -96,7 +97,7 @@ export function InvoiceForm({
               render={({ field, fieldState }) => (
                 <TextField
                   select
-                  label="Kunde"
+                  label={t('client')}
                   fullWidth
                   {...field}
                   error={!!fieldState.error}
@@ -115,7 +116,7 @@ export function InvoiceForm({
             <FormTextField
               control={c}
               name="issueDate"
-              label="Rechnungsdatum"
+              label={t('issueDate')}
               type="date"
               slotProps={{ inputLabel: { shrink: true } }}
             />
@@ -124,7 +125,7 @@ export function InvoiceForm({
             <FormTextField
               control={c}
               name="serviceDate"
-              label="Leistungsdatum"
+              label={t('serviceDate')}
               type="date"
               slotProps={{ inputLabel: { shrink: true } }}
             />
@@ -133,15 +134,15 @@ export function InvoiceForm({
             <FormTextField
               control={c}
               name="dueDate"
-              label="Fällig am"
+              label={t('dueDate')}
               type="date"
               slotProps={{ inputLabel: { shrink: true } }}
-              helperText="leer = Zahlungsziel"
+              helperText={t('dueDateHint')}
             />
           </Grid>
         </Grid>
         <Typography variant="subtitle1" fontWeight={600}>
-          Positionen
+          {t('lines')}
         </Typography>
         {lines.fields.map((f, i) => (
           <Grid container spacing={1} key={f.id} alignItems="flex-start">
@@ -149,21 +150,26 @@ export function InvoiceForm({
               <FormTextField
                 control={c}
                 name={`lines.${i}.description`}
-                label="Beschreibung"
+                label={tc('description')}
                 size="small"
               />
             </Grid>
             <Grid size={{ xs: 4, md: 1.5 }}>
-              <FormTextField control={c} name={`lines.${i}.quantity`} label="Menge" size="small" />
+              <FormTextField
+                control={c}
+                name={`lines.${i}.quantity`}
+                label={t('quantity')}
+                size="small"
+              />
             </Grid>
             <Grid size={{ xs: 4, md: 1.5 }}>
-              <FormTextField control={c} name={`lines.${i}.unit`} label="Einheit" size="small" />
+              <FormTextField control={c} name={`lines.${i}.unit`} label={t('unit')} size="small" />
             </Grid>
             <Grid size={{ xs: 4, md: 1.5 }}>
               <FormTextField
                 control={c}
                 name={`lines.${i}.unitPrice`}
-                label="Einzelpreis (netto)"
+                label={t('unitPrice')}
                 size="small"
               />
             </Grid>
@@ -175,14 +181,14 @@ export function InvoiceForm({
                   <TextField
                     select
                     size="small"
-                    label="Steuer"
+                    label={t('tax')}
                     fullWidth
                     {...field}
                     disabled={klein}
                   >
-                    {TREATMENTS.map(([v, l]) => (
+                    {TAX_TREATMENT.map((v) => (
                       <MenuItem key={v} value={v}>
-                        {l}
+                        {te(v)}
                       </MenuItem>
                     ))}
                   </TextField>
@@ -193,7 +199,7 @@ export function InvoiceForm({
               <IconButton
                 onClick={() => lines.remove(i)}
                 disabled={lines.fields.length === 1}
-                aria-label="Position entfernen"
+                aria-label={t('removeLine')}
               >
                 <DeleteIcon />
               </IconButton>
@@ -210,19 +216,11 @@ export function InvoiceForm({
           }
           sx={{ alignSelf: 'flex-start' }}
         >
-          Position hinzufügen
+          {t('addLine')}
         </Button>
-        <FormTextField
-          control={c}
-          name="notes"
-          label="Hinweise (optional)"
-          multiline
-          minRows={2}
-          nullable
-        />
+        <FormTextField control={c} name="notes" label={t('notes')} multiline minRows={2} nullable />
         <Typography variant="body2" color="text.secondary">
-          Netto-, Steuer- und Bruttobeträge werden vom Server berechnet und nach dem Speichern
-          angezeigt.
+          {t('serverTotalsHint')}
         </Typography>
         <Button
           type="submit"
@@ -230,7 +228,7 @@ export function InvoiceForm({
           disabled={pending}
           sx={{ alignSelf: 'flex-start' }}
         >
-          Entwurf speichern
+          {t('saveDraft')}
         </Button>
       </Stack>
     </form>

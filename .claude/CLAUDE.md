@@ -33,4 +33,5 @@ Codebase map (read first): `docs/architecture/knowledge-graph.md`.
 - Service signatures: mutations `(tx: TxCtx, cmd)`, reads `(ctx: AnyCtx, query)`.
 - Routes registered via `defineRoutes()` so `ROUTE_REGISTRY` + OpenAPI stay in sync.
 - Tests: unit in `src/**/__tests__/*.test.ts`; integration in `apps/api/test/*.test.ts` using `test/setup/harness.ts` (needs docker Postgres).
+- Web UI text: never hard-code — `useTranslations('<ns>')` with keys in `apps/web/messages/de.json` **and** `en.json`; money/dates via `useFormat()` (Epic 18, `docs/stories/EPIC-18-language-toggle.md`).
 - Never commit `.env`. Secrets only in env vars.

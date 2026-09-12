@@ -1,14 +1,14 @@
 'use client';
 import { Alert, Card, CardActionArea, CardContent, Grid, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { SANDBOX } from '@fa/contracts';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { useBusinessProfile } from '@/features/business-profile/hooks';
 import { CURRENT_YEAR, YearPicker } from '@/features/reports/components/YearPicker';
 import { useDashboard } from '@/features/reports/hooks';
-import { eur } from '@/lib/format';
+import { useFormat } from '@/lib/format';
 
 /** §51 — "Each number SHALL be clickable where an underlying list exists." */
 function Stat({ label, value, href }: { label: string; value: string; href?: string }) {
@@ -40,70 +40,69 @@ export default function DashboardPage() {
   const profile = useBusinessProfile();
   const q = useDashboard(year);
   const d = q.data;
+  const t = useTranslations('dashboard');
+  const tsb = useTranslations('sandbox');
+  const { eur } = useFormat();
   return (
     <>
-      <PageHeader title="Dashboard" actions={<YearPicker value={year} onChange={setYear} />} />
+      <PageHeader title={t('title')} actions={<YearPicker value={year} onChange={setYear} />} />
       {profile.data === null && (
         <Alert
           severity="warning"
           sx={{ mb: 2 }}
-          action={<Link href="/onboarding">Jetzt ausfüllen</Link>}
+          action={<Link href="/onboarding">{t('fillNow')}</Link>}
         >
-          Unternehmensprofil fehlt — ohne Profil können keine Rechnungen finalisiert werden.
+          {t('profileMissing')}
         </Alert>
       )}
       <ErrorAlert error={q.error} />
       <Stack spacing={2}>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Stat label="Einnahmen" value={eur(d?.revenue)} href="/invoices?status=PAID" />
+            <Stat label={t('revenue')} value={eur(d?.revenue)} href="/invoices?status=PAID" />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Stat label="Ausgaben" value={eur(d?.expenses)} href="/expenses?status=POSTED" />
+            <Stat label={t('expenses')} value={eur(d?.expenses)} href="/expenses?status=POSTED" />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Stat label="Gewinn" value={eur(d?.profit)} href="/reports/euer" />
+            <Stat label={t('profit')} value={eur(d?.profit)} href="/reports/euer" />
           </Grid>
         </Grid>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <Stat
-              label="Offene Rechnungen"
+              label={t('outstanding')}
               value={eur(d?.outstandingInvoices)}
               href="/invoices?status=FINALIZED"
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <Stat
-              label="Umsatzsteuer-Vorschau (zahlbar)"
-              value={eur(d?.vat.payable)}
-              href="/reports/vat"
-            />
+            <Stat label={t('vatPreview')} value={eur(d?.vat.payable)} href="/reports/vat" />
           </Grid>
         </Grid>
         <Card>
           <CardContent>
             <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-              Zu erledigen
+              {t('todo')}
             </Typography>
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 4 }}>
                 <Stat
-                  label="Ungeprüfte Banktransaktionen"
+                  label={t('unreviewedBank')}
                   value={String(d?.workItems.unreviewedBankTransactions ?? '—')}
                   href="/banking?classification=UNREVIEWED"
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
                 <Stat
-                  label="Belege zu prüfen"
+                  label={t('receiptsToReview')}
                   value={String(d?.workItems.receiptsNeedingReview ?? '—')}
                   href="/receipts?status=NEEDS_REVIEW"
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
                 <Stat
-                  label="Ausgaben-Entwürfe"
+                  label={t('draftExpenses')}
                   value={String(d?.workItems.draftExpenses ?? '—')}
                   href="/expenses?status=DRAFT"
                 />
@@ -112,7 +111,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
         <Typography variant="caption" color="text.secondary">
-          {SANDBOX.REPORT_DISCLAIMER}
+          {tsb('reportDisclaimer')}
         </Typography>
       </Stack>
     </>

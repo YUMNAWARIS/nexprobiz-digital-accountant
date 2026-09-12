@@ -1,26 +1,23 @@
 'use client';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Button, Grid, MenuItem, Stack, TextField } from '@mui/material';
+import { useLocale, useTranslations } from 'next-intl';
 import { Controller, useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import {
   CreateExpenseRequest,
+  TAX_TREATMENT,
   type ExpenseView,
   type ReceiptView,
-  type TaxTreatment,
 } from '@fa/contracts';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import { FormTextField } from '@/components/ui/FormTextField';
 import { useBusinessProfile } from '@/features/business-profile/hooks';
+import { useZodResolver } from '@/i18n/useZodResolver';
+import { useFormat } from '@/lib/format';
 import { useExpenseCategories } from '../hooks';
 
 type FormIn = z.input<typeof CreateExpenseRequest>;
 type FormOut = z.output<typeof CreateExpenseRequest>;
-const TREATMENTS: Array<[TaxTreatment, string]> = [
-  ['STANDARD_19', '19 % Vorsteuer'],
-  ['REDUCED_7', '7 % Vorsteuer'],
-  ['KLEINUNTERNEHMER_19', 'Keine Vorsteuer (§19)'],
-];
 
 /** Story 9.1 — a confirmed receipt prefills the draft. Amounts are declared, not computed here. */
 export function ExpenseForm({
@@ -39,8 +36,12 @@ export function ExpenseForm({
   const cats = useExpenseCategories();
   const profile = useBusinessProfile();
   const klein = profile.data?.vatRegime === 'KLEINUNTERNEHMER';
+  const t = useTranslations('expenses');
+  const tc = useTranslations('common');
+  const locale = useLocale();
+  const { date } = useFormat();
   const form = useForm<FormIn, unknown, FormOut>({
-    resolver: zodResolver(CreateExpenseRequest),
+    resolver: useZodResolver(CreateExpenseRequest),
     defaultValues: current
       ? {
           receiptId: current.receiptId,
@@ -77,12 +78,15 @@ export function ExpenseForm({
         <ErrorAlert error={error} />
         {receipt && (
           <Alert severity="info">
-            Vorbelegt aus Beleg „{receipt.merchant}“ vom {receipt.receiptDate}.
+            {t('prefilledFromReceipt', {
+              merchant: receipt.merchant ?? '—',
+              date: date(receipt.receiptDate),
+            })}
           </Alert>
         )}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormTextField control={c} name="merchant" label="Händler / Lieferant" autoFocus />
+            <FormTextField control={c} name="merchant" label={t('merchantField')} autoFocus />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <Controller
@@ -91,7 +95,7 @@ export function ExpenseForm({
               render={({ field, fieldState }) => (
                 <TextField
                   select
-                  label="Kategorie"
+                  label={t('category')}
                   fullWidth
                   {...field}
                   error={!!fieldState.error}
@@ -99,7 +103,7 @@ export function ExpenseForm({
                 >
                   {expenseCats.map((x) => (
                     <MenuItem key={x.id} value={x.id}>
-                      {x.nameDe}
+                      {locale === 'en' ? x.nameEn : x.nameDe}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -107,13 +111,13 @@ export function ExpenseForm({
             />
           </Grid>
           <Grid size={{ xs: 12 }}>
-            <FormTextField control={c} name="description" label="Beschreibung" nullable />
+            <FormTextField control={c} name="description" label={tc('description')} nullable />
           </Grid>
           <Grid size={{ xs: 6, md: 3 }}>
             <FormTextField
               control={c}
               name="expenseDate"
-              label="Belegdatum"
+              label={t('expenseDate')}
               type="date"
               slotProps={{ inputLabel: { shrink: true } }}
             />
@@ -122,7 +126,7 @@ export function ExpenseForm({
             <FormTextField
               control={c}
               name="paymentDate"
-              label="Zahlungsdatum"
+              label={t('paymentDate')}
               type="date"
               slotProps={{ inputLabel: { shrink: true } }}
               nullable
@@ -133,10 +137,10 @@ export function ExpenseForm({
               control={c}
               name="taxTreatment"
               render={({ field }) => (
-                <TextField select label="Steuer" fullWidth {...field}>
-                  {TREATMENTS.map(([v, l]) => (
+                <TextField select label={t('tax')} fullWidth {...field}>
+                  {TAX_TREATMENT.map((v) => (
                     <MenuItem key={v} value={v}>
-                      {l}
+                      {t(v)}
                     </MenuItem>
                   ))}
                 </TextField>
@@ -144,20 +148,20 @@ export function ExpenseForm({
             />
           </Grid>
           <Grid size={{ xs: 6, md: 3 }}>
-            <FormTextField control={c} name="businessPercentage" label="Geschäftlicher Anteil %" />
+            <FormTextField control={c} name="businessPercentage" label={t('businessPercentage')} />
           </Grid>
           <Grid size={{ xs: 4 }}>
-            <FormTextField control={c} name="netAmount" label="Netto" />
+            <FormTextField control={c} name="netAmount" label={tc('net')} />
           </Grid>
           <Grid size={{ xs: 4 }}>
-            <FormTextField control={c} name="taxAmount" label="USt" />
+            <FormTextField control={c} name="taxAmount" label={tc('vat')} />
           </Grid>
           <Grid size={{ xs: 4 }}>
             <FormTextField
               control={c}
               name="grossAmount"
-              label="Brutto"
-              helperText="Brutto = Netto + USt"
+              label={tc('gross')}
+              helperText={t('grossHint')}
             />
           </Grid>
         </Grid>
@@ -167,7 +171,7 @@ export function ExpenseForm({
           disabled={pending}
           sx={{ alignSelf: 'flex-start' }}
         >
-          Entwurf speichern
+          {t('saveDraft')}
         </Button>
       </Stack>
     </form>

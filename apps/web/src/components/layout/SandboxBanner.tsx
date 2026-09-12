@@ -1,7 +1,9 @@
+'use client';
 import { Alert } from '@mui/material';
-import { SANDBOX } from '@fa/contracts';
+import { useTranslations } from 'next-intl';
 /** §63 — displayed permanently in the sandbox header. */
 export function SandboxBanner() {
+  const t = useTranslations('sandbox');
   return (
     <Alert
       severity="warning"
@@ -9,7 +11,7 @@ export function SandboxBanner() {
       square
       sx={{ borderRadius: 0, justifyContent: 'center', py: 0 }}
     >
-      <strong>{SANDBOX.HEADER_WARNING}</strong>
+      <strong>{t('headerWarning')}</strong>
     </Alert>
   );
 }

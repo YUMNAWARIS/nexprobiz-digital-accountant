@@ -15,7 +15,8 @@ import {
 import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import type { PageMeta } from '@fa/contracts';
-import { ApiError } from '@/lib/api-client';
+import { useTranslations } from 'next-intl';
+import { useErrorMessage } from './ErrorAlert';
 
 export interface Column<T> {
   key: string;
@@ -32,7 +33,7 @@ export function DataTable<T>({
   getRowId,
   rowHref,
   onRowClick,
-  emptyText = 'Keine Einträge.',
+  emptyText,
   pagination,
 }: {
   rows: T[];
@@ -46,6 +47,8 @@ export function DataTable<T>({
   pagination?: PageMeta & { onPageChange: (page: number) => void };
 }) {
   const router = useRouter();
+  const t = useTranslations('common');
+  const errMsg = useErrorMessage();
   const clickable = Boolean(rowHref || onRowClick);
   return (
     <>
@@ -71,18 +74,14 @@ export function DataTable<T>({
             {!loading && !!error && (
               <TableRow>
                 <TableCell colSpan={columns.length}>
-                  <Alert severity="error">
-                    {error instanceof ApiError
-                      ? `${error.message} (${error.code})`
-                      : String((error as Error).message ?? error)}
-                  </Alert>
+                  <Alert severity="error">{errMsg(error)}</Alert>
                 </TableCell>
               </TableRow>
             )}
             {!loading && !error && rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={columns.length} align="center" sx={{ py: 4 }}>
-                  <Typography color="text.secondary">{emptyText}</Typography>
+                  <Typography color="text.secondary">{emptyText ?? t('empty')}</Typography>
                 </TableCell>
               </TableRow>
             )}

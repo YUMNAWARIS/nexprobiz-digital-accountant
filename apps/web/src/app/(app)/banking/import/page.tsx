@@ -15,6 +15,7 @@ import {
   Typography,
 } from '@mui/material';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { BANK_CSV_HEADER_LINE, type BankImportResponse } from '@fa/contracts';
 import { ErrorAlert } from '@/components/ui/ErrorAlert';
@@ -28,13 +29,14 @@ export default function BankImportPage() {
   const importCsv = useImportBankCsv();
   const [result, setResult] = useState<BankImportResponse | null>(null);
   const [templateError, setTemplateError] = useState<unknown>(null);
+  const t = useTranslations('banking');
   return (
     <>
       <PageHeader
-        title="Bank-CSV importieren"
+        title={t('importTitle')}
         actions={
           <Button component={Link} href="/banking" variant="outlined">
-            Zur Übersicht
+            {t('toOverview')}
           </Button>
         }
       />
@@ -42,26 +44,24 @@ export default function BankImportPage() {
         <Card>
           <CardContent>
             <Typography variant="subtitle1" gutterBottom>
-              1. Vorlage herunterladen
+              {t('step1')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Erwartete Spalten (genau in dieser Reihenfolge): <code>{BANK_CSV_HEADER_LINE}</code>.
-              Datumsformat <code>YYYY-MM-DD</code>, Beträge mit Punkt als Dezimaltrennzeichen,
-              Abgänge negativ, Währung <code>EUR</code>.
+              {t('expectedColumns')} <code>{BANK_CSV_HEADER_LINE}</code>. {t('formatHint')}
             </Typography>
             <ErrorAlert error={templateError} />
             <Button
               startIcon={<DownloadIcon />}
               onClick={() => bankingApi.template().catch(setTemplateError)}
             >
-              CSV-Vorlage
+              {t('template')}
             </Button>
           </CardContent>
         </Card>
         <Card>
           <CardContent>
             <Typography variant="subtitle1" gutterBottom>
-              2. Datei hochladen
+              {t('step2')}
             </Typography>
             <ErrorAlert error={importCsv.error} />
             <input
@@ -81,10 +81,10 @@ export default function BankImportPage() {
               onClick={() => input.current?.click()}
               disabled={importCsv.isPending}
             >
-              {importCsv.isPending ? 'Importiere…' : 'CSV auswählen'}
+              {importCsv.isPending ? t('importing') : t('chooseCsv')}
             </Button>
             <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-              max. 5 MB · doppelte Zeilen werden automatisch übersprungen
+              {t('uploadHint')}
             </Typography>
           </CardContent>
         </Card>
@@ -92,18 +92,22 @@ export default function BankImportPage() {
           <Card>
             <CardContent>
               <Typography variant="subtitle1" gutterBottom>
-                Ergebnis
+                {t('result')}
               </Typography>
               <Alert severity={result.failed > 0 ? 'warning' : 'success'} sx={{ mb: 2 }}>
-                {result.rows} Zeilen · {result.imported} importiert · {result.duplicates} Duplikate
-                · {result.failed} fehlerhaft
+                {t('resultLine', {
+                  rows: result.rows,
+                  imported: result.imported,
+                  duplicates: result.duplicates,
+                  failed: result.failed,
+                })}
               </Alert>
               {result.errors.length > 0 && (
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>Zeile</TableCell>
-                      <TableCell>Fehler</TableCell>
+                      <TableCell>{t('line')}</TableCell>
+                      <TableCell>{t('error')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -117,7 +121,7 @@ export default function BankImportPage() {
                 </Table>
               )}
               <Button component={Link} href="/banking?classification=UNREVIEWED" sx={{ mt: 2 }}>
-                Importierte Transaktionen prüfen
+                {t('reviewImported')}
               </Button>
             </CardContent>
           </Card>

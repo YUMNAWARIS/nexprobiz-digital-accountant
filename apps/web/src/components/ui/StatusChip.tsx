@@ -1,4 +1,6 @@
+'use client';
 import { Chip } from '@mui/material';
+import { useTranslations } from 'next-intl';
 const COLORS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info'> = {
   DRAFT: 'default',
   FINALIZED: 'primary',
@@ -21,28 +23,12 @@ const COLORS: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'er
   COMPLETED: 'success',
   PENDING: 'info',
 };
-const LABELS: Record<string, string> = {
-  DRAFT: 'Entwurf',
-  FINALIZED: 'Finalisiert',
-  PARTIALLY_PAID: 'Teilweise bezahlt',
-  PAID: 'Bezahlt',
-  CANCELLED: 'Storniert',
-  POSTED: 'Gebucht',
-  REVERSED: 'Storniert',
-  UPLOADED: 'Hochgeladen',
-  OCR_PROCESSING: 'Wird gelesen…',
-  NEEDS_REVIEW: 'Prüfen',
-  CONFIRMED: 'Bestätigt',
-  FAILED: 'Fehlgeschlagen',
-  UNREVIEWED: 'Ungeprüft',
-  BUSINESS: 'Geschäftlich',
-  PERSONAL: 'Privat',
-  TRANSFER: 'Umbuchung',
-  ACTIVE: 'Aktiv',
-  ARCHIVED: 'Archiviert',
-  COMPLETED: 'Fertig',
-  PENDING: 'Ausstehend',
-};
+/** Localized label for any status/classification enum value (messages: `status.*`). */
+export function useStatusLabel() {
+  const t = useTranslations('status');
+  return (status: string) => (t.has(status) ? t(status) : status);
+}
 export function StatusChip({ status }: { status: string }) {
-  return <Chip size="small" label={LABELS[status] ?? status} color={COLORS[status] ?? 'default'} />;
+  const label = useStatusLabel();
+  return <Chip size="small" label={label(status)} color={COLORS[status] ?? 'default'} />;
 }

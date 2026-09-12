@@ -2,6 +2,7 @@
 import AddIcon from '@mui/icons-material/Add';
 import { Button, Card, Stack, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import type { ClientStatus } from '@fa/contracts';
 import { DataTable } from '@/components/ui/DataTable';
@@ -13,21 +14,24 @@ export default function ClientsPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<ClientStatus>('ACTIVE');
   const [page, setPage] = useState(1);
+  const t = useTranslations('clients');
+  const tc = useTranslations('common');
+  const ts = useTranslations('status');
   const q = useClients({ search: search || undefined, status, page, pageSize: 20 });
   return (
     <>
       <PageHeader
-        title="Kunden"
+        title={t('title')}
         actions={
           <Button component={Link} href="/clients/new" variant="contained" startIcon={<AddIcon />}>
-            Neuer Kunde
+            {t('new')}
           </Button>
         }
       />
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
         <TextField
           size="small"
-          label="Suchen"
+          label={tc('search')}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -41,8 +45,8 @@ export default function ClientsPage() {
           value={status}
           onChange={(_, v: ClientStatus | null) => v && setStatus(v)}
         >
-          <ToggleButton value="ACTIVE">Aktiv</ToggleButton>
-          <ToggleButton value="ARCHIVED">Archiviert</ToggleButton>
+          <ToggleButton value="ACTIVE">{ts('ACTIVE')}</ToggleButton>
+          <ToggleButton value="ARCHIVED">{ts('ARCHIVED')}</ToggleButton>
         </ToggleButtonGroup>
       </Stack>
       <Card>
@@ -53,11 +57,15 @@ export default function ClientsPage() {
           getRowId={(r) => r.id}
           rowHref={(r) => `/clients/${r.id}`}
           columns={[
-            { key: 'name', header: 'Name', render: (r) => r.name },
-            { key: 'contact', header: 'Ansprechpartner', render: (r) => r.contactName ?? '—' },
-            { key: 'email', header: 'E-Mail', render: (r) => r.email ?? '—' },
-            { key: 'city', header: 'Ort', render: (r) => r.city ?? '—' },
-            { key: 'status', header: 'Status', render: (r) => <StatusChip status={r.status} /> },
+            { key: 'name', header: t('name'), render: (r) => r.name },
+            { key: 'contact', header: t('contact'), render: (r) => r.contactName ?? '—' },
+            { key: 'email', header: t('email'), render: (r) => r.email ?? '—' },
+            { key: 'city', header: t('city'), render: (r) => r.city ?? '—' },
+            {
+              key: 'status',
+              header: tc('status'),
+              render: (r) => <StatusChip status={r.status} />,
+            },
           ]}
           pagination={q.data ? { ...q.data.meta, onPageChange: setPage } : undefined}
         />
